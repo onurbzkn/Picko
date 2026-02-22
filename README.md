@@ -9,7 +9,7 @@
     <title>Picko Pro</title>
 
     
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json?v=1">
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
