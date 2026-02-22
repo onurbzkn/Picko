@@ -1,0 +1,22 @@
+{
+  "name": "Picko Pro: Chaos Decider",
+  "short_name": "Picko",
+  "description": "The ultimate neon chaos decider for friends.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00ff88",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/onurbzkn/Picko/main/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/onurbzkn/Picko/main/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
