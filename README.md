@@ -28,7 +28,8 @@
         .content-area { flex: 1; position: relative; width: 100%; height: calc(var(--vh) - var(--nav-height)); }
 
         .tab-content { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; justify-content: center; align-items: center; }
-        .tab-content.active { display: flex; }
+        .tab-content.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ARKA PLANLAR */
         #finger { background-color: var(--finger-bg); }
@@ -41,8 +42,18 @@
         @keyframes ringRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
         .winner { transform: translate(-50%, -50%) scale(1.6) !important; box-shadow: 0 0 60px currentColor; z-index: 100; }
 
-        /* DICE ANIMATION FIX */
-        #dice-container { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; align-content: center; width: 100%; height: 100%; margin-bottom: 50px; }
+        /* DICE & POINTER TAM ORTALAMA */
+        #dice-container { 
+            display: flex; gap: 40px; flex-wrap: wrap; 
+            justify-content: center; align-items: center; 
+            width: 100%; height: 100%; 
+            padding-bottom: 20px; /* Görsel denge */
+        }
+        .pointer-wrapper { 
+            display: flex; justify-content: center; align-items: center; 
+            width: 100%; height: 100%; 
+            padding-bottom: 20px;
+        }
         .scene { width: var(--dice-size); height: var(--dice-size); perspective: 600px; flex-shrink: 0; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .dice-face { position: absolute; width: 100%; height: 100%; background: #151515; border: 3px solid var(--dice-accent); display: flex; justify-content: center; align-items: center; font-size: calc(var(--dice-size) * 0.45); font-weight: 900; color: var(--dice-accent); border-radius: 20%; backface-visibility: hidden; }
@@ -57,7 +68,27 @@
         @keyframes crazyRoll { 0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } }
 
         /* POINTER */
-        #pointer-arrow { width: 45px; height: 200px; background: var(--pointer-accent); clip-path: polygon(50% 0%, 100% 100%, 50% 85%, 0% 100%); filter: drop-shadow(0 0 20px var(--pointer-accent)); transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1); margin-bottom: 60px; }
+        #pointer-arrow { width: 45px; height: 200px; background: var(--pointer-accent); clip-path: polygon(50% 0%, 100% 100%, 50% 85%, 0% 100%); filter: drop-shadow(0 0 25px var(--pointer-accent)); transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1); }
+
+        /* EFEKTLİ NAV BAR */
+        .nav-bar { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            width: 92%; max-width: 440px; height: var(--nav-height); 
+            background: rgba(18, 18, 18, 0.96); backdrop-filter: blur(30px); 
+            border-radius: 40px; display: flex; justify-content: space-around; align-items: center; 
+            z-index: 2000; border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            color: #444; flex: 1; transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
+            position: relative; cursor: pointer;
+        }
+        .nav-item i { font-style: normal; font-size: 28px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; opacity: 0.6; transition: 0.3s; }
+        
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item.active i { transform: translateY(-14px) scale(1.35); filter: drop-shadow(0 0 12px var(--accent-color)); }
+        .nav-item.active span { opacity: 1; transform: translateY(-4px); }
 
         /* SETTINGS */
         #settings { justify-content: flex-start; overflow-y: auto; padding-top: 60px; padding-bottom: 140px; background: #000; touch-action: pan-y; }
@@ -72,13 +103,6 @@
         .color-dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px currentColor; }
         .grid-title { font-weight: 700; color: #8e8e93; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
 
-        /* NAV BAR */
-        .nav-bar { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; height: var(--nav-height); background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(30px); border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #444; flex: 1; }
-        .nav-item.active { color: var(--accent-color); }
-        .nav-item i { font-style: normal; font-size: 28px; }
-        .nav-item.active i { transform: translateY(-12px) scale(1.3); }
-
         .top-controls { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; z-index: 1100; }
         .control-btn { background: transparent; border: none; color: #666; padding: 10px 20px; border-radius: 20px; font-weight: 800; }
         .control-btn.active { background: rgba(255, 255, 255, 0.2); color: white; }
@@ -89,7 +113,7 @@
         <div class="content-area">
             <div id="finger" class="tab-content active"><div class="top-controls"><button class="control-btn active" onclick="setWinnerCount(1, this)">1</button><button class="control-btn" onclick="setWinnerCount(2, this)">2</button></div><div id="finger-surface"></div></div>
             <div id="dice" class="tab-content"><div class="top-controls"><button class="control-btn active" onclick="setDiceCount(1, this)">1</button><button class="control-btn" onclick="setDiceCount(2, this)">2</button></div><div id="dice-container" onclick="rollAllDice()"></div></div>
-            <div id="pointer" class="tab-content"><div onclick="spinPointer()"><div id="pointer-arrow"></div></div></div>
+            <div id="pointer" class="tab-content"><div class="pointer-wrapper" onclick="spinPointer()"><div id="pointer-arrow"></div></div></div>
             <div id="settings" class="tab-content">
                 <div id="settings-main" class="settings-view active">
                     <h1 style="align-self: flex-start; margin-left: 5%; font-size: 36px; font-weight: 800; margin-bottom: 25px;">Settings</h1>
@@ -106,7 +130,12 @@
                 <div id="pointer-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container" id="p-container"></div></div>
             </div>
         </div>
-        <nav class="nav-bar"><div class="nav-item active" onclick="switchTab('finger', this)"><i>☝️</i><span>Finger</span></div><div class="nav-item" onclick="switchTab('dice', this)"><i>🎲</i><span>Dice</span></div><div class="nav-item" onclick="switchTab('pointer', this)"><i>📍</i><span>Pointer</span></div><div class="nav-item" onclick="switchTab('settings', this)"><i>⚙️</i><span>Settings</span></div></nav>
+        <nav class="nav-bar">
+            <div class="nav-item active" onclick="switchTab('finger', this)"><i>☝️</i><span>Finger</span></div>
+            <div class="nav-item" onclick="switchTab('dice', this)"><i>🎲</i><span>Dice</span></div>
+            <div class="nav-item" onclick="switchTab('pointer', this)"><i>📍</i><span>Pointer</span></div>
+            <div class="nav-item" onclick="switchTab('settings', this)"><i>⚙️</i><span>Settings</span></div>
+        </nav>
     </div>
 
     <script>
@@ -166,7 +195,7 @@
                     document.body.appendChild(el); activeFingers.set(t.identifier, el);
                 }
             }
-            if (activeFingers.size >= 2 && !isDeciding) setTimeout(pickWinners, 3000);
+            if (activeFingers.size >= 2) setTimeout(pickWinners, 3000);
         });
         surface.addEventListener('touchend', e => {
             const ids = new Set(Array.from(e.touches).map(t => t.identifier));
