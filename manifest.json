@@ -1,5 +1,5 @@
 {
-  "name": "Picko Pro",
+  "name": "Picko",
   "short_name": "Picko",
   "description": "The ultimate neon chaos decider for friends.",
   "start_url": "index.html",
@@ -11,12 +11,30 @@
     {
       "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Picko Finger Mode"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Picko Desktop View"
     }
   ]
 }
