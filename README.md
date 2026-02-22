@@ -16,6 +16,12 @@
             --finger-bg: #000000; --dice-bg: #000000; --pointer-bg: #000000;
         }
 
+        /* MAVİ YANMAYI TÜM SİSTEMDE ÖLDÜRDÜK */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            outline: none !important;
+        }
+
         html, body {
             margin: 0; padding: 0; width: 100%; height: var(--vh);
             background-color: #000; color: white; overflow: hidden;
@@ -25,11 +31,20 @@
         }
 
         .main-wrapper { position: relative; width: 100%; height: var(--vh); display: flex; flex-direction: column; }
-        .content-area { flex: 1; position: relative; width: 100%; height: calc(var(--vh) - var(--nav-height)); }
+        
+        /* CONTENT AREA ARTIK TAM ORTALANABİLİR */
+        .content-area { 
+            flex: 1; position: relative; width: 100%; 
+            height: calc(var(--vh) - var(--nav-height));
+            display: flex; flex-direction: column;
+        }
 
-        .tab-content { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; justify-content: center; align-items: center; }
+        .tab-content { 
+            display: none; width: 100%; height: 100%; 
+            position: absolute; top: 0; left: 0; 
+            flex-direction: column; justify-content: center; align-items: center; 
+        }
         .tab-content.active { display: flex; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ARKA PLANLAR */
         #finger { background-color: var(--finger-bg); }
@@ -40,20 +55,18 @@
         #finger-surface { width: 100%; height: 100%; position: absolute; z-index: 10; }
         .finger-circle { position: fixed; width: 120px; height: 120px; border-radius: 50%; border: 4px solid; transform: translate(-50%, -50%); pointer-events: none; animation: ringRotate 2s linear infinite; }
         @keyframes ringRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-        .winner { transform: translate(-50%, -50%) scale(1.6) !important; box-shadow: 0 0 60px currentColor; z-index: 100; }
 
-        /* DICE & POINTER TAM ORTALAMA */
+        /* DICE & POINTER TAM MERKEZLEME (CONTROLS ARTIK YER KAPLAMIYOR) */
         #dice-container { 
             display: flex; gap: 40px; flex-wrap: wrap; 
             justify-content: center; align-items: center; 
             width: 100%; height: 100%; 
-            padding-bottom: 20px; /* Görsel denge */
         }
         .pointer-wrapper { 
             display: flex; justify-content: center; align-items: center; 
             width: 100%; height: 100%; 
-            padding-bottom: 20px;
         }
+
         .scene { width: var(--dice-size); height: var(--dice-size); perspective: 600px; flex-shrink: 0; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .dice-face { position: absolute; width: 100%; height: 100%; background: #151515; border: 3px solid var(--dice-accent); display: flex; justify-content: center; align-items: center; font-size: calc(var(--dice-size) * 0.45); font-weight: 900; color: var(--dice-accent); border-radius: 20%; backface-visibility: hidden; }
@@ -67,10 +80,19 @@
         .rolling { animation: crazyRoll 0.5s linear infinite; }
         @keyframes crazyRoll { 0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } }
 
-        /* POINTER */
         #pointer-arrow { width: 45px; height: 200px; background: var(--pointer-accent); clip-path: polygon(50% 0%, 100% 100%, 50% 85%, 0% 100%); filter: drop-shadow(0 0 25px var(--pointer-accent)); transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1); }
 
-        /* EFEKTLİ NAV BAR */
+        /* TOP CONTROLS ARTIK İÇERİĞİ İTMİYOR */
+        .top-controls { 
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 10px; background: rgba(255,255,255,0.1); 
+            padding: 8px 16px; border-radius: 30px; z-index: 1100; 
+            backdrop-filter: blur(10px);
+        }
+        .control-btn { background: transparent; border: none; color: #666; padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+        .control-btn.active { background: rgba(255, 255, 255, 0.15); color: white; }
+
+        /* PREMİUM NAV BAR */
         .nav-bar { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
             width: 92%; max-width: 440px; height: var(--nav-height); 
@@ -78,14 +100,9 @@
             border-radius: 40px; display: flex; justify-content: space-around; align-items: center; 
             z-index: 2000; border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .nav-item { 
-            display: flex; flex-direction: column; align-items: center; 
-            color: #444; flex: 1; transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
-            position: relative; cursor: pointer;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #444; flex: 1; transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); position: relative; }
         .nav-item i { font-style: normal; font-size: 28px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; opacity: 0.6; transition: 0.3s; }
-        
+        .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; opacity: 0.6; }
         .nav-item.active { color: var(--accent-color); }
         .nav-item.active i { transform: translateY(-14px) scale(1.35); filter: drop-shadow(0 0 12px var(--accent-color)); }
         .nav-item.active span { opacity: 1; transform: translateY(-4px); }
@@ -102,10 +119,6 @@
         .color-dot { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid transparent; }
         .color-dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px currentColor; }
         .grid-title { font-weight: 700; color: #8e8e93; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
-
-        .top-controls { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; z-index: 1100; }
-        .control-btn { background: transparent; border: none; color: #666; padding: 10px 20px; border-radius: 20px; font-weight: 800; }
-        .control-btn.active { background: rgba(255, 255, 255, 0.2); color: white; }
     </style>
 </head>
 <body>
@@ -222,7 +235,7 @@
             setTimeout(() => {
                 const r = ['rotateY(0deg)','rotateY(180deg)','rotateX(-90deg)','rotateX(90deg)','rotateY(-90deg)','rotateY(90deg)'];
                 dice.forEach(d => { d.classList.remove('rolling'); d.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; d.style.transform = r[Math.floor(Math.random()*6)]; });
-                if(navigator.vibrate) navigator.vibrate(60);
+                if (navigator.vibrate) navigator.vibrate(60);
             }, 600);
         }
         let curRot = 0;
