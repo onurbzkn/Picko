@@ -11,32 +11,29 @@
         :root {
             --bg-color: #000000; --accent-color: #00ff88; 
             --nav-height: 85px; --list-bg: #1c1c1e; --border-color: #38383a;
-            --dice-size: 90px; --dice-accent: #00ff88; --pointer-accent: #00ff88;
+            --dice-size: 110px; --dice-accent: #00ff88; --pointer-accent: #00ff88;
             --vh: 100vh;
             --finger-bg: #000000; --dice-bg: #000000; --pointer-bg: #000000;
         }
 
-        /* MAVİ YANMAYI TÜM SİSTEMDE ÖLDÜRDÜK */
-        * {
-            -webkit-tap-highlight-color: transparent !important;
-            outline: none !important;
-        }
+        /* MAVİ PARLAMAYI ÖLDÜR */
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
 
         html, body {
             margin: 0; padding: 0; width: 100%; height: var(--vh);
             background-color: #000; color: white; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            user-select: none; -webkit-user-select: none;
-            touch-action: none; position: fixed;
+            position: fixed; top: 0; left: 0;
         }
 
         .main-wrapper { position: relative; width: 100%; height: var(--vh); display: flex; flex-direction: column; }
         
-        /* CONTENT AREA ARTIK TAM ORTALANABİLİR */
+        /* CONTENT AREA: MUTLAK MERKEZLEME */
         .content-area { 
             flex: 1; position: relative; width: 100%; 
             height: calc(var(--vh) - var(--nav-height));
             display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
         }
 
         .tab-content { 
@@ -46,7 +43,6 @@
         }
         .tab-content.active { display: flex; animation: fadeIn 0.3s ease; }
 
-        /* ARKA PLANLAR */
         #finger { background-color: var(--finger-bg); }
         #dice { background-color: var(--dice-bg); }
         #pointer { background-color: var(--pointer-bg); }
@@ -56,20 +52,25 @@
         .finger-circle { position: fixed; width: 120px; height: 120px; border-radius: 50%; border: 4px solid; transform: translate(-50%, -50%); pointer-events: none; animation: ringRotate 2s linear infinite; }
         @keyframes ringRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* DICE & POINTER TAM MERKEZLEME (CONTROLS ARTIK YER KAPLAMIYOR) */
+        /* ZAR & SAYI SİMETRİSİ */
         #dice-container { 
-            display: flex; gap: 40px; flex-wrap: wrap; 
+            display: flex; gap: 30px; flex-wrap: wrap; 
             justify-content: center; align-items: center; 
-            width: 100%; height: 100%; 
+            width: 100%; max-width: 100vw;
         }
-        .pointer-wrapper { 
-            display: flex; justify-content: center; align-items: center; 
-            width: 100%; height: 100%; 
-        }
-
         .scene { width: var(--dice-size); height: var(--dice-size); perspective: 600px; flex-shrink: 0; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .dice-face { position: absolute; width: 100%; height: 100%; background: #151515; border: 3px solid var(--dice-accent); display: flex; justify-content: center; align-items: center; font-size: calc(var(--dice-size) * 0.45); font-weight: 900; color: var(--dice-accent); border-radius: 20%; backface-visibility: hidden; }
+        
+        .dice-face { 
+            position: absolute; width: var(--dice-size); height: var(--dice-size); 
+            background: #151515; border: 4px solid var(--dice-accent); 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 55px; /* SABİT BOYUT */
+            font-weight: 900; color: var(--dice-accent); 
+            border-radius: 22%; backface-visibility: hidden;
+            box-sizing: border-box; line-height: var(--dice-size); /* SAYIYI TAM ORTALAR */
+        }
+
         .f1 { transform: rotateY(0deg) translateZ(calc(var(--dice-size)/2)); }
         .f6 { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
         .f2 { transform: rotateX(90deg) translateZ(calc(var(--dice-size)/2)); }
@@ -80,19 +81,20 @@
         .rolling { animation: crazyRoll 0.5s linear infinite; }
         @keyframes crazyRoll { 0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } }
 
-        #pointer-arrow { width: 45px; height: 200px; background: var(--pointer-accent); clip-path: polygon(50% 0%, 100% 100%, 50% 85%, 0% 100%); filter: drop-shadow(0 0 25px var(--pointer-accent)); transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1); }
+        /* POINTER */
+        .pointer-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        #pointer-arrow { width: 55px; height: 230px; background: var(--pointer-accent); clip-path: polygon(50% 0%, 100% 100%, 50% 85%, 0% 100%); filter: drop-shadow(0 0 25px var(--pointer-accent)); transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1); }
 
-        /* TOP CONTROLS ARTIK İÇERİĞİ İTMİYOR */
+        /* KONTROLLER ARTIK ÜSTTE SABİT */
         .top-controls { 
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%); 
-            display: flex; gap: 10px; background: rgba(255,255,255,0.1); 
-            padding: 8px 16px; border-radius: 30px; z-index: 1100; 
-            backdrop-filter: blur(10px);
+            position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 12px; background: rgba(255,255,255,0.08); 
+            padding: 8px 16px; border-radius: 30px; z-index: 1100; backdrop-filter: blur(10px);
         }
-        .control-btn { background: transparent; border: none; color: #666; padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+        .control-btn { background: transparent; border: none; color: #555; padding: 10px 22px; border-radius: 20px; font-weight: 800; font-size: 14px; }
         .control-btn.active { background: rgba(255, 255, 255, 0.15); color: white; }
 
-        /* PREMİUM NAV BAR */
+        /* NAV BAR */
         .nav-bar { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
             width: 92%; max-width: 440px; height: var(--nav-height); 
@@ -104,8 +106,8 @@
         .nav-item i { font-style: normal; font-size: 28px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; opacity: 0.6; }
         .nav-item.active { color: var(--accent-color); }
-        .nav-item.active i { transform: translateY(-14px) scale(1.35); filter: drop-shadow(0 0 12px var(--accent-color)); }
-        .nav-item.active span { opacity: 1; transform: translateY(-4px); }
+        .nav-item.active i { transform: translateY(-15px) scale(1.4); filter: drop-shadow(0 0 12px var(--accent-color)); }
+        .nav-item.active span { opacity: 1; transform: translateY(-5px); }
 
         /* SETTINGS */
         #settings { justify-content: flex-start; overflow-y: auto; padding-top: 60px; padding-bottom: 140px; background: #000; touch-action: pan-y; }
@@ -118,7 +120,6 @@
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; width: 100%; justify-items: center; padding: 10px 0; }
         .color-dot { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid transparent; }
         .color-dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px currentColor; }
-        .grid-title { font-weight: 700; color: #8e8e93; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -128,16 +129,7 @@
             <div id="dice" class="tab-content"><div class="top-controls"><button class="control-btn active" onclick="setDiceCount(1, this)">1</button><button class="control-btn" onclick="setDiceCount(2, this)">2</button></div><div id="dice-container" onclick="rollAllDice()"></div></div>
             <div id="pointer" class="tab-content"><div class="pointer-wrapper" onclick="spinPointer()"><div id="pointer-arrow"></div></div></div>
             <div id="settings" class="tab-content">
-                <div id="settings-main" class="settings-view active">
-                    <h1 style="align-self: flex-start; margin-left: 5%; font-size: 36px; font-weight: 800; margin-bottom: 25px;">Settings</h1>
-                    <div class="settings-container">
-                        <div class="settings-group">
-                            <div class="settings-item" onclick="showSubSettings('finger-settings')"><span>☝️ Finger Settings</span><span>›</span></div>
-                            <div class="settings-item" onclick="showSubSettings('dice-settings')"><span>🎲 Dice Settings</span><span>›</span></div>
-                            <div class="settings-item" onclick="showSubSettings('pointer-settings')"><span>📍 Pointer Settings</span><span>›</span></div>
-                        </div>
-                    </div>
-                </div>
+                <div id="settings-main" class="settings-view active"><h1 style="align-self: flex-start; margin-left: 5%; font-size: 36px; font-weight: 800; margin-bottom: 25px;">Settings</h1><div class="settings-container"><div class="settings-group"><div class="settings-item" onclick="showSubSettings('finger-settings')"><span>☝️ Finger Settings</span><span>›</span></div><div class="settings-item" onclick="showSubSettings('dice-settings')"><span>🎲 Dice Settings</span><span>›</span></div><div class="settings-item" onclick="showSubSettings('pointer-settings')"><span>📍 Pointer Settings</span><span>›</span></div></div></div></div>
                 <div id="finger-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container" id="f-container"></div></div>
                 <div id="dice-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container" id="d-container"></div></div>
                 <div id="pointer-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container" id="p-container"></div></div>
@@ -159,11 +151,7 @@
         const darkNeons = ['#001a0d', '#1a001a', '#000d1a', '#1a1a00', '#1a0000', '#0d1a00', '#1a000d', '#001a1a', '#1a1a0d', '#1a0d00'];
         let isDeciding = false; let fingerGlowColor = '#00ff88'; let activeFingers = new Map(); let winnerCount = 1; let diceCount = 1;
 
-        function showSubSettings(id) { 
-            document.querySelectorAll('.settings-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            renderSubSettings(id); 
-        }
+        function showSubSettings(id) { document.querySelectorAll('.settings-view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); renderSubSettings(id); }
         function hideSubSettings() { document.querySelectorAll('.settings-view').forEach(v => v.classList.remove('active')); document.getElementById('settings-main').classList.add('active'); }
 
         function renderSubSettings(id) {
