@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Picko Pro - Final Edition</title>
-    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00ff88">
+    <title>Picko Pro</title>
+
+    <link rel="manifest" href='data:application/json,{"name":"Picko Pro","short_name":"Picko","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#00ff88","icons":[{"src":"https://api.dicebear.com/7.x/shapes/svg?seed=picko","sizes":"192x192","type":"image/svg+xml"},{"src":"https://api.dicebear.com/7.x/shapes/svg?seed=picko","sizes":"512x512","type":"image/svg+xml"}]}'>
 
     <style>
         :root {
@@ -35,7 +37,7 @@
         #dice { background-color: var(--dice-bg); }
         #pointer { background-color: var(--pointer-bg); }
 
-        /* --- FINGER DYNAMICS --- */
+        /* FINGER DYNAMICS */
         .finger-circle { 
             position: absolute; width: 120px; height: 120px; 
             border-radius: 50%; border: 4px solid; 
@@ -48,32 +50,25 @@
         .winner { animation: winner-pulse 0.6s infinite alternate !important; transform: translate(-50%, -50%) scale(1.6) !important; box-shadow: 0 0 70px currentColor; z-index: 100; }
         @keyframes winner-pulse { from { opacity: 1; transform: translate(-50%, -50%) scale(1.5); } to { opacity: 0.7; transform: translate(-50%, -50%) scale(1.7); } }
 
-        /* --- SETTINGS (FIXED ALIGNMENT) --- */
+        /* SETTINGS */
         #settings { justify-content: flex-start; overflow-y: auto; padding-top: 40px; padding-bottom: 130px; background: #000; }
         .settings-view { width: 100%; display: none; flex-direction: column; align-items: center; }
         .settings-view.active { display: flex; }
         .settings-container { width: 90%; max-width: 500px; }
-        
         .settings-group { background: var(--list-bg); border-radius: 12px; margin-bottom: 25px; overflow: hidden; }
-        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-color); }
-        .settings-item:last-child { border-bottom: none; }
-        
+        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .item-label { display: flex; align-items: center; gap: 12px; font-size: 17px; }
         .item-icon { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-size: 18px; }
-        .chevron { color: #8e8e93; font-size: 18px; font-weight: bold; }
         .back-btn { align-self: flex-start; margin-left: 5%; margin-bottom: 20px; color: var(--accent-color); font-weight: 700; font-size: 18px; cursor: pointer; }
-
         .color-grid-container { width: 100%; }
         .grid-title { font-weight: 700; color: #8e8e93; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; justify-items: center; }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         .color-dot { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid transparent; }
         .color-dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 15px currentColor; }
-
-        .size-grid { display: flex; gap: 10px; width: 100%; }
-        .size-btn { flex: 1; padding: 12px; background: #2c2c2e; border: none; border-radius: 10px; color: white; font-weight: 700; font-size: 14px; }
+        .size-btn { flex: 1; padding: 12px; background: #2c2c2e; border: none; border-radius: 10px; color: white; font-weight: 700; }
         .size-btn.active { background: var(--accent-color); color: black; }
 
-        /* --- NAV BAR --- */
+        /* NAV BAR */
         .nav-bar { 
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
             width: 94%; max-width: 450px; height: var(--nav-height); 
@@ -81,13 +76,12 @@
             border-radius: 45px; display: flex; justify-content: space-around; align-items: center; 
             z-index: 2000; border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex: 1; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex: 1; }
+        .nav-item.active { color: var(--accent-color); transform: translateY(-12px); }
         .nav-item i { font-style: normal; font-size: 28px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
-        .nav-item.active { color: var(--accent-color); transform: translateY(-12px); }
-        .nav-item.active i { transform: scale(1.3); filter: drop-shadow(0 0 8px var(--accent-color)); }
 
-        /* --- OTHERS --- */
+        /* DICE & POINTER */
         .scene { width: var(--dice-size); height: var(--dice-size); perspective: 600px; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .dice-face { position: absolute; width: 100%; height: 100%; background: #151515; border: 2.5px solid var(--dice-accent); display: flex; justify-content: center; align-items: center; font-size: calc(var(--dice-size) * 0.45); font-weight: 900; color: var(--dice-accent); border-radius: 18%; backface-visibility: hidden; }
@@ -127,43 +121,15 @@
                 <h1 style="align-self: flex-start; margin-left: 5%; font-size: 34px; font-weight: 800; margin-bottom: 25px;">Settings</h1>
                 <div class="settings-container">
                     <div class="settings-group">
-                        <div class="settings-item" onclick="showSubSettings('finger-settings')"><div class="item-label"><div class="item-icon" style="background:#34c759;">☝️</div><span>Finger Settings</span></div><span class="chevron">›</span></div>
-                        <div class="settings-item" onclick="showSubSettings('dice-settings')"><div class="item-label"><div class="item-icon" style="background:#5856d6;">🎲</div><span>Dice Settings</span></div><span class="chevron">›</span></div>
-                        <div class="settings-item" onclick="showSubSettings('pointer-settings')"><div class="item-label"><div class="item-icon" style="background:#ff9500;">📍</div><span>Pointer Settings</span></div><span class="chevron">›</span></div>
+                        <div class="settings-item" onclick="showSubSettings('finger-settings')"><div class="item-label"><div class="item-icon" style="background:#34c759;">☝️</div><span>Finger Settings</span></div><span>›</span></div>
+                        <div class="settings-item" onclick="showSubSettings('dice-settings')"><div class="item-label"><div class="item-icon" style="background:#5856d6;">🎲</div><span>Dice Settings</span></div><span>›</span></div>
+                        <div class="settings-item" onclick="showSubSettings('pointer-settings')"><div class="item-label"><div class="item-icon" style="background:#ff9500;">📍</div><span>Pointer Settings</span></div><span>›</span></div>
                     </div>
                 </div>
             </div>
-
-            <div id="finger-settings" class="settings-view">
-                <div class="back-btn" onclick="hideSubSettings()">‹ Back</div>
-                <div class="settings-container">
-                    <div class="settings-group">
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="f-bg-grid"></div></div></div>
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Glow</div><div class="color-grid" id="f-gl-grid"></div></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="dice-settings" class="settings-view">
-                <div class="back-btn" onclick="hideSubSettings()">‹ Back</div>
-                <div class="settings-container">
-                    <div class="settings-group">
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Size</div><div class="size-grid"><button class="size-btn" onclick="setDiceSize(65, this)">Small</button><button class="size-btn active" onclick="setDiceSize(90, this)">Medium</button><button class="size-btn" onclick="setDiceSize(120, this)">Large</button></div></div></div>
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="d-bg-grid"></div></div></div>
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Dice Color</div><div class="color-grid" id="d-ac-grid"></div></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="pointer-settings" class="settings-view">
-                <div class="back-btn" onclick="hideSubSettings()">‹ Back</div>
-                <div class="settings-container">
-                    <div class="settings-group">
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="p-bg-grid"></div></div></div>
-                        <div class="settings-item"><div class="color-grid-container"><div class="grid-title">Arrow Color</div><div class="color-grid" id="p-ac-grid"></div></div></div>
-                    </div>
-                </div>
-            </div>
+            <div id="finger-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container"><div class="settings-group"><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="f-bg-grid"></div></div></div><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Glow</div><div class="color-grid" id="f-gl-grid"></div></div></div></div></div></div>
+            <div id="dice-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container"><div class="settings-group"><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Size</div><div style="display:flex;gap:10px;"><button class="size-btn" onclick="setDiceSize(65, this)">Small</button><button class="size-btn active" onclick="setDiceSize(90, this)">Medium</button><button class="size-btn" onclick="setDiceSize(120, this)">Large</button></div></div></div><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="d-bg-grid"></div></div></div><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Dice Color</div><div class="color-grid" id="d-ac-grid"></div></div></div></div></div></div>
+            <div id="pointer-settings" class="settings-view"><div class="back-btn" onclick="hideSubSettings()">‹ Back</div><div class="settings-container"><div class="settings-group"><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Background</div><div class="color-grid" id="p-bg-grid"></div></div></div><div class="settings-item"><div class="color-grid-container"><div class="grid-title">Arrow Color</div><div class="color-grid" id="p-ac-grid"></div></div></div></div></div></div>
         </div>
     </div>
 
@@ -175,6 +141,11 @@
     </nav>
 
     <script>
+        // PWA SERVICE WORKER (BUNU EKLEDİM)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi.h...').catch(() => {});
+        }
+
         const neons = ['#00FF88', '#FF00FF', '#00D0FF', '#FFCC00', '#FF4444', '#7FFF00', '#FF007F', '#00FFFF', '#FFFF00', '#FF8C00'];
         const darkNeons = ['#001a0d', '#1a001a', '#000d1a', '#1a1a00', '#1a0000', '#0d1a00', '#1a000d', '#001a1a', '#1a1a0d', '#1a0d00'];
 
