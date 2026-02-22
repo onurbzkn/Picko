@@ -8,7 +8,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Picko Pro</title>
 
-    <link rel="manifest" href='data:application/json,{"name":"Picko Pro","short_name":"Picko","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#00ff88","icons":[{"src":"https://api.dicebear.com/7.x/shapes/svg?seed=picko","sizes":"192x192","type":"image/svg+xml"}]}'>
+    
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
 
     <style>
         :root {
