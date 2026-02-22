@@ -9,33 +9,21 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "192.png",
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88&size=192",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "512.png",
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88&size=512",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "512.png",
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=picko&backgroundColor=00ff88&size=512",
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow"
