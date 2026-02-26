@@ -35,13 +35,15 @@
         /* CONTENT AREA ARTIK TAM ORTALANABİLİR */
         .content-area { 
             flex: 1; position: relative; width: 100%; 
-            height: calc(var(--vh) - var(--nav-height));
+            /* height: calc(var(--vh) - var(--nav-height)); Bu satır silindi */
             display: flex; flex-direction: column;
+            justify-content: center; /* Dikeyde ortalama */
+            align-items: center;    /* Yatayda ortalama */
         }
 
         .tab-content { 
             display: none; width: 100%; height: 100%; 
-            position: absolute; top: 0; left: 0; 
+            /* position: absolute; top: 0; left: 0; Bu satırlar silindi */
             flex-direction: column; justify-content: center; align-items: center; 
         }
         .tab-content.active { display: flex; animation: fadeIn 0.3s ease; }
@@ -92,7 +94,14 @@
 
         .scene { width: var(--dice-size); height: var(--dice-size); perspective: 600px; flex-shrink: 0; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .dice-face { position: absolute; width: 100%; height: 100%; background: #151515; border: 3px solid var(--dice-accent); display: flex; justify-content: center; align-items: center; font-size: calc(var(--dice-size) * 0.45); font-weight: 900; color: var(--dice-accent); border-radius: 20%; backface-visibility: hidden; }
+        .dice-face { 
+            position: absolute; width: 100%; height: 100%; background: #151515; border: 3px solid var(--dice-accent); 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: calc(var(--dice-size) * 0.38); /* Yazı boyutu küçültüldü */
+            font-weight: 900; color: var(--dice-accent); border-radius: 20%; 
+            backface-visibility: hidden;
+            padding-top: 5px; /* Dikey dikeyde mükemmel ortalama için eklendi */
+        }
         .f1 { transform: rotateY(0deg) translateZ(calc(var(--dice-size)/2)); }
         .f6 { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
         .f2 { transform: rotateX(90deg) translateZ(calc(var(--dice-size)/2)); }
