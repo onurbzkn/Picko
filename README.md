@@ -11,6 +11,9 @@
             --secondary: #7000ff;
             --text: #ffffff;
             --die-size: 80px;
+            --nav-height: 75px;
+            --nav-safe: env(safe-area-inset-bottom, 0px);
+            --nav-total: calc(var(--nav-height) + var(--nav-safe));
         }
 
         body {
@@ -19,7 +22,8 @@
             color: var(--text);
             font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -27,17 +31,23 @@
         /* Navigasyon */
         .bottom-nav {
             position: fixed;
-            bottom: 0; width: 100%; height: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: min(100%, 720px);
+            height: var(--nav-height);
+            padding-bottom: var(--nav-safe);
             background: rgba(15, 20, 35, 0.95);
             backdrop-filter: blur(10px);
             display: flex; justify-content: space-around; align-items: center;
             border-top: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
+            box-sizing: content-box;
         }
         .nav-item { color: #444; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.3s; text-transform: uppercase; text-align: center; }
         .nav-item.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
 
-        .tab-content { display: none; height: calc(100vh - 75px); width: 100%; position: relative; }
+        .tab-content { display: none; height: calc(100dvh - var(--nav-total)); width: 100%; position: relative; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
         /* Finger Geri Sayım - Tam Orta */
