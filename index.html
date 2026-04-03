@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Picko Pro - Final</title>
+    <style>
+        :root {
+            --bg-color: #0b101b;
+            --accent: #00f2ff;
+            --secondary: #7000ff;
+            --text: #ffffff;
+            --die-size: 80px;
+            --nav-height: 75px;
+            --nav-safe: env(safe-area-inset-bottom, 0px);
+            --nav-total: calc(var(--nav-height) + var(--nav-safe));
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-color);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .content {
+            height: 100dvh;
+            padding-bottom: var(--nav-total);
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigasyon */
+        .bottom-nav {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: min(100%, 720px);
+            height: var(--nav-height);
+            padding-bottom: var(--nav-safe);
+            background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+            backdrop-filter: blur(22px) saturate(170%);
+            -webkit-backdrop-filter: blur(22px) saturate(170%);
+            display: flex; justify-content: space-around; align-items: center;
+            border: 1px solid rgba(255,255,255,0.16);
+            border-bottom: 0;
+            border-radius: 24px 24px 0 0;
+            z-index: 1000;
+            box-sizing: content-box;
+            overflow: hidden;
+            pointer-events: auto;
+            box-shadow:
+                0 -10px 30px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.35),
+                inset 0 -1px 0 rgba(255,255,255,0.08);
+        }
+        .bottom-nav::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            left: -25%;
+            width: 45%;
+            height: 220%;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0) 100%);
+            filter: blur(1px);
+            animation: liquidShine 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes liquidShine {
+            0% { transform: translateX(-40%) rotate(12deg); opacity: 0.2; }
+            45% { opacity: 0.55; }
+            100% { transform: translateX(330%) rotate(12deg); opacity: 0.2; }
+        }
+        .nav-item {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            color: #9aa0ae;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform .25s ease, color .25s ease, background-color .25s ease, box-shadow .25s ease;
+            z-index: 1;
+            user-select: none;
+            pointer-events: auto;
+        }
+        .nav-item.active {
+            color: #fff;
+            transform: translateY(-4px) scale(1.06);
+            background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+            box-shadow:
+                0 10px 24px rgba(0, 242, 255, 0.22),
+                inset 0 0 0 1px rgba(255,255,255,0.25),
+                0 0 18px var(--accent);
+            text-shadow: 0 0 12px var(--accent);
+        }
+        .nav-item:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .tab-content { display: none; height: 100%; width: 100%; position: relative; overflow-y: auto; box-sizing: border-box; }
+        .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 14px 28px; }
+        #flow.tab-content.active, #settings.tab-content.active { justify-content: flex-start; }
+        #dice.tab-content.active { justify-content: center; }
+        #dice-display { min-height: 52vh; align-items: center; justify-content: center; }
+
+        /* Finger Geri Sayım - Tam Orta */
+        #countdown { 
+            position: absolute; 
+            top: 15%; 
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            font-size: 5rem; 
+            font-weight: 900; 
+            color: var(--accent); 
+            text-shadow: 0 0 25px var(--accent); 
+            z-index: 20; 
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #finger-area { width: 100%; flex: 1; touch-action: none; position: relative; min-height: 300px; }
+        .finger-picker {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+        }
+        .pick-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.24);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-weight: 800;
+        }
+        .pick-btn.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(0,242,255,.4); color: var(--accent); }
+        .touch-circle {
+            position: absolute; width: 90px; height: 90px;
+            border: 5px solid var(--accent); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
+            box-shadow: 0 0 25px var(--accent); z-index: 10;
+        }
+        .touch-circle.winner { border-color: #00ff88; box-shadow: 0 0 50px #00ff88; scale: 1.3; transition: all 0.3s ease; }
+        .touch-circle.loser { border-color: #ff3366; opacity: 0.2; scale: 0.8; transition: all 0.3s ease; }
+
+        /* 3D Dice */
+        #dice { cursor: pointer; background: radial-gradient(circle, #1a2a4a 0%, #0b101b 100%); }
+        .scene { width: var(--die-size); height: var(--die-size); perspective: 600px; }
+        .cube {
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(45deg);
+            transition: transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+        }
+        .cube-face {
+            position: absolute; width: var(--die-size); height: var(--die-size);
+            background: white; border: 1px solid #ddd; display: flex;
+            align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: #111; border-radius: 12px;
+        }
+        .front { transform: rotateY(0deg) translateZ(40px); }
+        .back { transform: rotateY(180deg) translateZ(40px); }
+        .right { transform: rotateY(90deg) translateZ(40px); }
+        .left { transform: rotateY(-90deg) translateZ(40px); }
+        .top { transform: rotateX(90deg) translateZ(40px); }
+        .bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+        /* Flow */
+        #arrow {
+            width: 0; height: 0; border-left: 35px solid transparent; border-right: 35px solid transparent;
+            border-bottom: 170px solid var(--accent); filter: drop-shadow(0 0 20px var(--accent));
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); transform-origin: 50% 100%; margin-bottom: 170px;
+        }
+
+        /* Bilgi Metinleri - En Alt */
+        .hint { 
+            position: absolute; 
+            bottom: 30px; 
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px; 
+            color: rgba(255,255,255,0.4); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            pointer-events: none;
+        }
+
+        /* Ayarlar */
+        .settings-list { width: 92%; max-width: 420px; display: grid; gap: 16px; }
+        .settings-group {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .settings-group-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: .65;
+            padding: 0 6px 2px;
+        }
+        .setting-item {
+            background: rgba(255,255,255,0.02); padding: 14px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .setting-item:last-child { border-bottom: 0; }
+        .color-dots { display: flex; gap: 10px; }
+        .dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .dot.active { border-color: white; transform: scale(1.1); }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Flow+ Extra Tools */
+        .tool-shell { width: 92%; max-width: 700px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .tool-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
+        .tool-tab {
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.06);
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tool-tab.active { color: #fff; border-color: var(--accent); box-shadow: 0 0 12px rgba(0,242,255,.28); }
+        .tool-panel { display: none; width: 100%; background: rgba(255,255,255,0.05); border-radius: 18px; padding: 14px; box-sizing: border-box; }
+        .tool-panel.active { display: block; }
+        .tool-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .tool-input, .tool-select, .tool-btn, .tool-textarea {
+            border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+            background: rgba(0,0,0,.18); color: #fff;
+        }
+        .tool-input, .tool-select { padding: 9px 10px; }
+        .tool-textarea { width: 100%; min-height: 78px; padding: 10px; resize: vertical; box-sizing: border-box; }
+        .tool-btn { padding: 10px 12px; font-weight: 700; cursor: pointer; }
+        .tool-result { margin-top: 10px; font-weight: 700; font-size: 1.05rem; color: var(--accent); min-height: 24px; }
+        .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 36px; }
+        .chip {
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(255,255,255,.08);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .chip button { background: transparent; border: 0; color: #ff7a9a; cursor: pointer; font-weight: 700; }
+        .playing-card {
+            width: 98px; height: 132px; margin: 12px auto 4px;
+            border-radius: 12px;
+            background: linear-gradient(155deg, #fff, #f4f4f4);
+            color: #111;
+            display: grid; place-items: center;
+            font-size: 2rem; font-weight: 900;
+            box-shadow: 0 10px 24px rgba(0,0,0,.25);
+        }
+        .playing-card.red { color: #b91c1c; }
+        .card-history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+        .mini-card {
+            width: 42px; height: 58px; border-radius: 8px;
+            background: #fff; color: #111; border: 1px solid #ddd;
+            display: grid; place-items: center; font-size: 1rem; font-weight: 700;
+        }
+        .mini-card.red { color: #b91c1c; }
+        .coin {
+            width: 100px; height: 100px; margin: 6px auto; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff7bf, #eab308 50%, #a16207 100%);
+            display: grid; place-items: center; font-size: 2rem; font-weight: 900; color: #332400;
+            transform-style: preserve-3d;
+        }
+        .coin.flip { animation: coinFlip 1s ease-in-out; }
+        @keyframes coinFlip {
+            0% { transform: rotateY(0) rotateX(0); }
+            100% { transform: rotateY(1080deg) rotateX(720deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="countdown"></div>
+
+        <div class="content">
+        <div id="finger" class="tab-content active">
+            <div class="finger-picker">
+                <button class="pick-btn active" onclick="setWinnerCount(1, this)">1</button>
+                <button class="pick-btn" onclick="setWinnerCount(2, this)">2</button>
+                <button class="pick-btn" onclick="setWinnerCount(3, this)">3</button>
+            </div>
+            <div id="finger-area"></div>
+            <div class="hint" id="fingerHint" data-tr="SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE" data-en="ADD TOUCHES / CLICKS UP TO SELECTED COUNT">SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE</div>
+        </div>
+
+        <div id="dice" class="tab-content" onclick="rollDice()">
+            <div style="position: absolute; top: 20px; display: flex; gap: 10px;">
+                <button onclick="event.stopPropagation(); setDice(1)" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">1 ZAR</button>
+                <button onclick="event.stopPropagation(); setDice(2)" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">2 ZAR</button>
+                <button onclick="event.stopPropagation(); setDice(3)" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">3 ZAR</button>
+            </div>
+            <div id="dice-display" style="display:flex; gap:40px;"></div>
+            <div class="hint" data-tr="ATMAK İÇİN DOKUN" data-en="TOUCH TO ROLL">ATMAK İÇİN DOKUN</div>
+        </div>
+
+        <div id="flow" class="tab-content">
+            <div class="tool-shell">
+                <div class="tool-tabs">
+                    <button class="tool-tab active" onclick="showTool('arrow', this)">Çark</button>
+                    <button class="tool-tab" onclick="showTool('couples', this)">Çiftler</button>
+                    <button class="tool-tab" onclick="showTool('study', this)">Eğitim</button>
+                    <button class="tool-tab" onclick="showTool('coin', this)">Yazı-Tura</button>
+                    <button class="tool-tab" onclick="showTool('names', this)">İsim Çek</button>
+                    <button class="tool-tab" onclick="showTool('cards', this)">Kart Çek</button>
+                </div>
+
+                <div id="tool-arrow" class="tool-panel active">
+                    <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+                        <div id="arrow"></div>
+                        <div style="position:absolute; width:30px; height:30px; background:#fff; border-radius:50%; box-shadow:0 0 20px #fff;"></div>
+                    </div>
+                    <div class="tool-row" style="justify-content:center;">
+                        <button class="tool-btn" onclick="spinArrow()">Döndür</button>
+                    </div>
+                    <div class="tool-result" id="arrowResult"></div>
+                </div>
+
+                <div id="tool-couples" class="tool-panel">
+                    <div class="tool-row">
+                        <select id="coupleTopic" class="tool-select">
+                            <option value="dinner">Akşam ne yiyelim?</option>
+                            <option value="movie">Hangi tür film?</option>
+                            <option value="weekend">Hafta sonu ne yapalım?</option>
+                        </select>
+                        <button class="tool-btn" onclick="pickCouples()">Rastgele Seç</button>
+                    </div>
+                    <div class="tool-result" id="couplesResult"></div>
+                </div>
+
+                <div id="tool-study" class="tool-panel">
+                    <div class="tool-row">
+                        <input id="studyInput" class="tool-input" placeholder="Konu ekle (örn: Kas-İskelet Hastalıkları)" style="min-width:260px;">
+                        <button class="tool-btn" onclick="addStudyTopic()">Ekle</button>
+                    </div>
+                    <div id="studyList" class="chip-list"></div>
+                    <div class="tool-row">
+                        <button class="tool-btn" onclick="clearStudyTopics()">Temizle</button>
+                        <button class="tool-btn" onclick="pickStudyTopic()">Konu Seç</button>
+                    </div>
+                    <div class="tool-result" id="studyResult"></div>
+                </div>
+
+                <div id="tool-coin" class="tool-panel">
+                    <div id="coinVisual" class="coin">?</div>
+                    <div class="tool-row" style="justify-content:center;">
+                        <button class="tool-btn" onclick="flipCoin()">Parayı At</button>
+                    </div>
+                    <div class="tool-result" id="coinResult"></div>
+                </div>
+
+                <div id="tool-names" class="tool-panel">
+                    <div class="tool-row">
+                        <input id="nameInput" class="tool-input" placeholder="İsim ekle" style="min-width:220px;">
+                        <button class="tool-btn" onclick="addName()">Ekle</button>
+                        <input id="nameCount" class="tool-input" type="number" min="1" value="1" style="width:90px;">
+                        <button class="tool-btn" onclick="drawNames()">İsim Çek</button>
+                    </div>
+                    <div id="nameListVisual" class="chip-list"></div>
+                    <div class="tool-result" id="namesResult"></div>
+                </div>
+
+                <div id="tool-cards" class="tool-panel">
+                    <div class="tool-row">
+                        <button class="tool-btn" onclick="drawCard()">Kart Çek</button>
+                        <button class="tool-btn" onclick="resetDeck()">Desteyi Sıfırla</button>
+                    </div>
+                    <div id="cardVisual" class="playing-card">🂠</div>
+                    <div class="tool-result" id="cardResult"></div>
+                    <div id="cardHistory" class="card-history"></div>
+                </div>
+            </div>
+            <div class="hint" data-tr="MOD SEÇ, KARAR VER" data-en="CHOOSE MODE, DECIDE FAST">MOD SEÇ, KARAR VER</div>
+        </div>
+
+        <div id="settings" class="tab-content">
+            <h2 style="margin-bottom:30px;" data-tr="AYARLAR" data-en="SETTINGS">AYARLAR</h2>
+            <div class="settings-list">
+                <div>
+                    <div class="settings-group-title">Görünüm</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Tema Rengi" data-en="Theme Color">Tema Rengi</span>
+                            <div class="color-dots">
+                                <div class="dot" style="background:#00f2ff;" onclick="setTheme('#00f2ff')"></div>
+                                <div class="dot" style="background:#00ff88;" onclick="setTheme('#00ff88')"></div>
+                                <div class="dot" style="background:#ff00ea;" onclick="setTheme('#ff00ea')"></div>
+                                <div class="dot" style="background:#ff9500;" onclick="setTheme('#ff9500')"></div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <span>Animasyon Hızı</span>
+                            <select id="animSpeed" class="tool-select" onchange="setAnimSpeed(this.value)">
+                                <option value="1">Normal</option>
+                                <option value="0.75">Hızlı</option>
+                                <option value="1.25">Yavaş</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="settings-group-title">Geri Bildirim</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Titreşim" data-en="Vibration">Titreşim</span>
+                            <label class="switch"><input type="checkbox" id="vibrateToggle" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-tr="Ses Efektleri" data-en="Sound Effects">Ses Efektleri</span>
+                            <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-tr="Haptik Gücü" data-en="Haptic Strength">Haptik Gücü</span>
+                            <select id="hapticStrength" class="tool-select">
+                                <option value="20">Hafif</option>
+                                <option value="40" selected>Orta</option>
+                                <option value="80">Güçlü</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="settings-group-title">Genel</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Dil / Language" data-en="Language / Dil">Dil</span>
+                            <button onclick="toggleLang()" id="langBtn" style="background:none; border:1px solid #555; color:white; padding:5px 10px; border-radius:8px;">TR</button>
+                        </div>
+                        <div class="setting-item">
+                            <span>Verileri Sıfırla</span>
+                            <button class="tool-btn" onclick="resetAppSettings()">Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:20px; font-size:12px; opacity:0.3;">Picko v4.1 - Hocama Özel</div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" data-tab="finger" onclick="showTab('finger', this)" aria-label="Finger">👆</div>
+        <div class="nav-item" data-tab="dice" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
+        <div class="nav-item" data-tab="flow" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
+        <div class="nav-item" data-tab="settings" onclick="showTab('settings', this)" aria-label="Settings">⚙️</div>
+    </nav>
+
+    <script>
+        let currentLang = 'tr';
+        const config = { accent: '#00f2ff', vibrate: true, sound: true, winners: 1, haptic: 40, animSpeed: 1 };
+        const STORAGE_KEY = 'pickoSettingsV2';
+
+        function showTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+            if(id === 'dice') setDice(1);
+        }
+
+        function setTheme(color) {
+            document.documentElement.style.setProperty('--accent', color);
+            config.accent = color;
+            persistSettings();
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'tr' ? 'en' : 'tr';
+            document.getElementById('langBtn').innerText = currentLang.toUpperCase();
+            document.querySelectorAll('[data-tr]').forEach(el => {
+                el.innerText = el.getAttribute('data-' + currentLang);
+            });
+            persistSettings();
+        }
+
+        function setAnimSpeed(multiplier) {
+            config.animSpeed = Number(multiplier) || 1;
+            document.getElementById('arrow').style.transitionDuration = `${4 * config.animSpeed}s`;
+            persistSettings();
+        }
+
+        function vibratePulse(ms = config.haptic) {
+            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(ms);
+        }
+
+        function persistSettings() {
+            const payload = {
+                accent: config.accent,
+                lang: currentLang,
+                winners: config.winners,
+                haptic: Number(document.getElementById('hapticStrength')?.value || 40),
+                animSpeed: Number(document.getElementById('animSpeed')?.value || 1),
+                sound: document.getElementById('soundToggle')?.checked,
+                vibrate: document.getElementById('vibrateToggle')?.checked
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }
+
+        function loadSettings() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(!raw) return;
+            const s = JSON.parse(raw);
+            if(s.accent) setTheme(s.accent);
+            if(typeof s.sound === 'boolean') document.getElementById('soundToggle').checked = s.sound;
+            if(typeof s.vibrate === 'boolean') document.getElementById('vibrateToggle').checked = s.vibrate;
+            if(s.haptic) document.getElementById('hapticStrength').value = String(s.haptic);
+            if(s.animSpeed) {
+                document.getElementById('animSpeed').value = String(s.animSpeed);
+                setAnimSpeed(s.animSpeed);
+            }
+            if(s.winners) {
+                const idx = Math.min(3, Math.max(1, Number(s.winners)));
+                const btn = document.querySelectorAll('.pick-btn')[idx - 1];
+                setWinnerCount(idx, btn);
+            }
+            if(s.lang && s.lang !== currentLang) toggleLang();
+        }
+
+        function resetAppSettings() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+
+        function playSound(type) {
+            if(!document.getElementById('soundToggle').checked) return;
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            if(type === 'roll') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(); osc.stop(ctx.currentTime + 0.1);
+            } else if(type === 'win') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start(); osc.stop(ctx.currentTime + 0.3);
+            }
+        }
+
+        /* Finger Logic */
+        const fingerArea = document.getElementById('finger-area');
+        const countdownEl = document.getElementById('countdown');
+        let touches = {}, timer = null, isFinished = false;
+        let mouseCounter = 0;
+        let autoResetTimer = null;
+
+        function setWinnerCount(n, el) {
+            config.winners = n;
+            document.querySelectorAll('.pick-btn').forEach(b => b.classList.remove('active'));
+            if(el) el.classList.add('active');
+            const hint = document.getElementById('fingerHint');
+            hint.innerText = `${n} kişi seçilecek - ${n} temas/tıklama ekle`;
+            persistSettings();
+            checkTimer();
+        }
+
+        fingerArea.addEventListener('touchstart', e => {
+            if(isFinished) resetFinger();
+            Array.from(e.changedTouches).forEach(t => {
+                const dot = document.createElement('div');
+                dot.className = 'touch-circle'; dot.id = 't-' + t.identifier;
+                dot.style.left = t.pageX + 'px'; dot.style.top = t.pageY + 'px';
+                fingerArea.appendChild(dot);
+                touches[t.identifier] = dot;
+            });
+            checkTimer();
+        });
+
+        fingerArea.addEventListener('touchmove', e => {
+            e.preventDefault();
+            Array.from(e.changedTouches).forEach(t => {
+                const dot = document.getElementById('t-' + t.identifier);
+                if(dot) { dot.style.left = t.pageX + 'px'; dot.style.top = t.pageY + 'px'; }
+            });
+        }, { passive: false });
+
+        fingerArea.addEventListener('touchend', e => {
+            Array.from(e.changedTouches).forEach(t => {
+                const dot = document.getElementById('t-' + t.identifier);
+                if(dot) dot.remove();
+                delete touches[t.identifier];
+            });
+            checkTimer();
+        });
+
+        fingerArea.addEventListener('mousedown', e => {
+            if(e.button !== 0) return;
+            if(isFinished) resetFinger();
+            const id = `m-${mouseCounter++}`;
+            const dot = document.createElement('div');
+            dot.className = 'touch-circle';
+            dot.id = id;
+            dot.style.left = e.offsetX + 'px';
+            dot.style.top = e.offsetY + 'px';
+            fingerArea.appendChild(dot);
+            touches[id] = dot;
+            checkTimer();
+        });
+
+        function checkTimer() {
+            const count = Object.keys(touches).length;
+            if (count >= config.winners) { if (!timer) startCountdown(); } else { stopCountdown(); }
+        }
+
+        function startCountdown() {
+            let timeLeft = 3; countdownEl.innerText = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--; countdownEl.innerText = timeLeft || "";
+                if (timeLeft <= 0) { clearInterval(timer); selectWinner(); }
+            }, 1000);
+        }
+
+        function stopCountdown() { clearInterval(timer); timer = null; countdownEl.innerText = ""; }
+
+        function selectWinner() {
+            const keys = Object.keys(touches);
+            if(keys.length < config.winners) return;
+            const shuffled = [...keys].sort(() => Math.random() - 0.5);
+            const winners = new Set(shuffled.slice(0, config.winners));
+            keys.forEach(k => touches[k].classList.add(winners.has(k) ? 'winner' : 'loser'));
+            isFinished = true; countdownEl.innerText = `${config.winners}`;
+            playSound('win');
+            vibratePulse([80, 40, 80]);
+            clearTimeout(autoResetTimer);
+            autoResetTimer = setTimeout(() => resetFinger(), 2000);
+        }
+
+        function resetFinger() { clearTimeout(autoResetTimer); fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
+
+        /* 3D Dice Logic */
+        function setDice(n) {
+            const container = document.getElementById('dice-display');
+            container.innerHTML = "";
+            for(let i=0; i<n; i++) {
+                const scene = document.createElement('div');
+                scene.className = 'scene';
+                scene.innerHTML = `<div class="cube" id="cube-${i}">
+                    <div class="cube-face front">1</div><div class="cube-face back">6</div>
+                    <div class="cube-face right">3</div><div class="cube-face left">4</div>
+                    <div class="cube-face top">2</div><div class="cube-face bottom">5</div>
+                </div>`;
+                container.appendChild(scene);
+            }
+        }
+
+        function rollDice() {
+            const cubes = document.querySelectorAll('.cube');
+            playSound('roll');
+            vibratePulse(config.haptic);
+            cubes.forEach(cube => {
+                const result = Math.floor(Math.random() * 6) + 1;
+                const xExtra = (Math.floor(Math.random() * 4) + 4) * 360;
+                const yExtra = (Math.floor(Math.random() * 4) + 4) * 360;
+                let x = 0, y = 0;
+                switch(result) {
+                    case 1: x = 0; y = 0; break;
+                    case 2: x = -90; y = 0; break;
+                    case 3: x = 0; y = -90; break;
+                    case 4: x = 0; y = 90; break;
+                    case 5: x = 90; y = 0; break;
+                    case 6: x = 0; y = 180; break;
+                }
+                cube.style.transform = `rotateX(${x + xExtra}deg) rotateY(${y + yExtra}deg)`;
+            });
+        }
+
+        /* Flow + Extra Tools Logic */
+        function showTool(id, el) {
+            document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tool-' + id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        const couplesOptions = {
+            dinner: ["Pizza + film gecesi", "Sushi", "Makarna + salata", "Burger", "Evde kahvaltı tabağı"],
+            movie: ["Romantik Komedi", "Gerilim", "Animasyon", "Bilim Kurgu", "Belgesel"],
+            weekend: ["Sahilde yürüyüş", "Kahve + kitap", "Müze gezisi", "Oyun gecesi", "Mini piknik"]
+        };
+        let studyTopics = [];
+        let namePool = [];
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function pickCouples() {
+            const key = document.getElementById('coupleTopic').value;
+            const choice = pickRandom(couplesOptions[key]);
+            document.getElementById('couplesResult').innerText = `Öneri: ${choice}`;
+            playSound('win');
+        }
+
+        function renderChipList(targetId, items, remover) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = "";
+            items.forEach((item, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `<span>${item}</span>`;
+                const btn = document.createElement('button');
+                btn.innerText = '×';
+                btn.onclick = () => remover(i);
+                chip.appendChild(btn);
+                container.appendChild(chip);
+            });
+        }
+
+        function addStudyTopic() {
+            const input = document.getElementById('studyInput');
+            const value = input.value.trim();
+            if(!value) return;
+            studyTopics.push(value);
+            input.value = "";
+            renderStudyTopics();
+        }
+        function renderStudyTopics() { renderChipList('studyList', studyTopics, removeStudyTopic); }
+        function removeStudyTopic(i) { studyTopics.splice(i, 1); renderStudyTopics(); }
+        function clearStudyTopics() {
+            studyTopics = [];
+            renderStudyTopics();
+            document.getElementById('studyResult').innerText = "";
+        }
+
+        function pickStudyTopic() {
+            if(!studyTopics.length) {
+                document.getElementById('studyResult').innerText = "Önce en az 1 konu gir.";
+                return;
+            }
+            document.getElementById('studyResult').innerText = `Bugünkü tekrar: ${pickRandom(studyTopics)}`;
+            playSound('roll');
+        }
+
+        function flipCoin() {
+            const result = Math.random() < 0.5 ? "Yazı" : "Tura";
+            const coin = document.getElementById('coinVisual');
+            coin.classList.remove('flip');
+            void coin.offsetWidth;
+            coin.classList.add('flip');
+            setTimeout(() => { coin.innerText = result === "Yazı" ? "Y" : "T"; }, 450);
+            document.getElementById('coinResult').innerText = `Sonuç: ${result}`;
+            playSound('roll');
+            vibratePulse(config.haptic);
+        }
+
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const value = input.value.trim();
+            if(!value) return;
+            namePool.push(value);
+            input.value = "";
+            renderNames();
+        }
+        function renderNames() { renderChipList('nameListVisual', namePool, removeName); }
+        function removeName(i) { namePool.splice(i, 1); renderNames(); }
+
+        function drawNames() {
+            if(!namePool.length) {
+                document.getElementById('namesResult').innerText = "Önce isimleri gir.";
+                return;
+            }
+            const count = Math.max(1, Math.min(parseInt(document.getElementById('nameCount').value || '1', 10), namePool.length));
+            const shuffled = [...namePool].sort(() => Math.random() - 0.5);
+            const picked = shuffled.slice(0, count);
+            document.getElementById('namesResult').innerText = count === 1 ? `Seçilen: ${picked[0]}` : `Seçilenler: ${picked.join(', ')}`;
+            playSound('win');
+        }
+
+        const suits = ["♠", "♥", "♦", "♣"];
+        const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+        let deck = [];
+        function resetDeck() {
+            deck = [];
+            suits.forEach(s => ranks.forEach(r => deck.push(`${r}${s}`)));
+            document.getElementById('cardResult').innerText = "Deste yenilendi (52 kart).";
+            document.getElementById('cardVisual').innerText = "🂠";
+            document.getElementById('cardVisual').classList.remove('red');
+            document.getElementById('cardHistory').innerHTML = "";
+        }
+        function drawCard() {
+            if(deck.length === 0) resetDeck();
+            const i = Math.floor(Math.random() * deck.length);
+            const card = deck.splice(i, 1)[0];
+            document.getElementById('cardResult').innerText = `Kart: ${card}  |  Kalan: ${deck.length}`;
+            const suit = card.slice(-1);
+            const visual = document.getElementById('cardVisual');
+            visual.innerText = card;
+            visual.classList.toggle('red', suit === '♥' || suit === '♦');
+            const mini = document.createElement('div');
+            mini.className = `mini-card ${(suit === '♥' || suit === '♦') ? 'red' : ''}`;
+            mini.innerText = card;
+            const history = document.getElementById('cardHistory');
+            history.prepend(mini);
+            if(history.childElementCount > 10) history.removeChild(history.lastElementChild);
+            playSound('roll');
+        }
+
+        let currentRotation = 0;
+        function spinArrow() {
+            const arrow = document.getElementById('arrow');
+            currentRotation += 2000 + Math.floor(Math.random() * 2000);
+            arrow.style.transform = `rotate(${currentRotation}deg)`;
+            const deg = ((currentRotation % 360) + 360) % 360;
+            document.getElementById('arrowResult').innerText = `Açı: ${Math.round(deg)}°`;
+            playSound('roll');
+            vibratePulse(config.haptic);
+        }
+
+        setDice(1);
+        resetDeck();
+        setAnimSpeed(1);
+        setWinnerCount(1, document.querySelector('.pick-btn'));
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => showTab(item.dataset.tab, item));
+        });
+        document.getElementById('vibrateToggle').addEventListener('change', persistSettings);
+        document.getElementById('soundToggle').addEventListener('change', persistSettings);
+        document.getElementById('hapticStrength').addEventListener('change', e => { config.haptic = Number(e.target.value); persistSettings(); });
+        document.getElementById('studyInput').addEventListener('keydown', e => { if(e.key === 'Enter') addStudyTopic(); });
+        document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key === 'Enter') addName(); });
+        renderStudyTopics();
+        renderNames();
+        loadSettings();
+    </script>
+</body>
+</html>
