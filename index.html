@@ -29,6 +29,9 @@
             -webkit-user-select: none;
         }
         .content {
+            height: 100dvh;
+            padding-bottom: var(--nav-total);
+            box-sizing: border-box;
             height: calc(100dvh - var(--nav-total));
             overflow: hidden;
         }
@@ -248,6 +251,35 @@
         .tool-textarea { width: 100%; min-height: 78px; padding: 10px; resize: vertical; box-sizing: border-box; }
         .tool-btn { padding: 10px 12px; font-weight: 700; cursor: pointer; }
         .tool-result { margin-top: 10px; font-weight: 700; font-size: 1.05rem; color: var(--accent); min-height: 24px; }
+        .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 36px; }
+        .chip {
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(255,255,255,.08);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .chip button { background: transparent; border: 0; color: #ff7a9a; cursor: pointer; font-weight: 700; }
+        .playing-card {
+            width: 98px; height: 132px; margin: 12px auto 4px;
+            border-radius: 12px;
+            background: linear-gradient(155deg, #fff, #f4f4f4);
+            color: #111;
+            display: grid; place-items: center;
+            font-size: 2rem; font-weight: 900;
+            box-shadow: 0 10px 24px rgba(0,0,0,.25);
+        }
+        .playing-card.red { color: #b91c1c; }
+        .card-history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+        .mini-card {
+            width: 42px; height: 58px; border-radius: 8px;
+            background: #fff; color: #111; border: 1px solid #ddd;
+            display: grid; place-items: center; font-size: 1rem; font-weight: 700;
+        }
+        .mini-card.red { color: #b91c1c; }
         .coin {
             width: 100px; height: 100px; margin: 6px auto; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fff7bf, #eab308 50%, #a16207 100%);
@@ -322,6 +354,13 @@
                 </div>
 
                 <div id="tool-study" class="tool-panel">
+                    <div class="tool-row">
+                        <input id="studyInput" class="tool-input" placeholder="Konu ekle (örn: Kas-İskelet Hastalıkları)" style="min-width:260px;">
+                        <button class="tool-btn" onclick="addStudyTopic()">Ekle</button>
+                    </div>
+                    <div id="studyList" class="chip-list"></div>
+                    <div class="tool-row">
+                        <button class="tool-btn" onclick="clearStudyTopics()">Temizle</button>
                     <textarea id="studyTopics" class="tool-textarea" placeholder="Konuları satır satır yaz (örn: Sinir Sistemi Hastalıkları)"></textarea>
                     <div class="tool-row">
                         <button class="tool-btn" onclick="pickStudyTopic()">Konu Seç</button>
@@ -338,6 +377,13 @@
                 </div>
 
                 <div id="tool-names" class="tool-panel">
+                    <div class="tool-row">
+                        <input id="nameInput" class="tool-input" placeholder="İsim ekle" style="min-width:220px;">
+                        <button class="tool-btn" onclick="addName()">Ekle</button>
+                        <input id="nameCount" class="tool-input" type="number" min="1" value="1" style="width:90px;">
+                        <button class="tool-btn" onclick="drawNames()">İsim Çek</button>
+                    </div>
+                    <div id="nameListVisual" class="chip-list"></div>
                     <textarea id="nameList" class="tool-textarea" placeholder="İsimleri virgül veya satırla ayırarak gir"></textarea>
                     <div class="tool-row">
                         <input id="nameCount" class="tool-input" type="number" min="1" value="1" style="width:90px;">
@@ -351,6 +397,9 @@
                         <button class="tool-btn" onclick="drawCard()">Kart Çek</button>
                         <button class="tool-btn" onclick="resetDeck()">Desteyi Sıfırla</button>
                     </div>
+                    <div id="cardVisual" class="playing-card">🂠</div>
+                    <div class="tool-result" id="cardResult"></div>
+                    <div id="cardHistory" class="card-history"></div>
                     <div class="tool-result" id="cardResult"></div>
                 </div>
             </div>
@@ -527,6 +576,7 @@
         const countdownEl = document.getElementById('countdown');
         let touches = {}, timer = null, isFinished = false;
         let mouseCounter = 0;
+        let autoResetTimer = null;
 
         function setWinnerCount(n, el) {
             config.winners = n;
@@ -605,6 +655,11 @@
             isFinished = true; countdownEl.innerText = `${config.winners}`;
             playSound('win');
             vibratePulse([80, 40, 80]);
+            clearTimeout(autoResetTimer);
+            autoResetTimer = setTimeout(() => resetFinger(), 2000);
+        }
+
+        function resetFinger() { clearTimeout(autoResetTimer); fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
         }
 
         function resetFinger() { fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
@@ -659,6 +714,8 @@
             movie: ["Romantik Komedi", "Gerilim", "Animasyon", "Bilim Kurgu", "Belgesel"],
             weekend: ["Sahilde yürüyüş", "Kahve + kitap", "Müze gezisi", "Oyun gecesi", "Mini piknik"]
         };
+        let studyTopics = [];
+        let namePool = [];
         function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
         function pickCouples() {
@@ -668,6 +725,43 @@
             playSound('win');
         }
 
+        function renderChipList(targetId, items, remover) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = "";
+            items.forEach((item, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `<span>${item}</span>`;
+                const btn = document.createElement('button');
+                btn.innerText = '×';
+                btn.onclick = () => remover(i);
+                chip.appendChild(btn);
+                container.appendChild(chip);
+            });
+        }
+
+        function addStudyTopic() {
+            const input = document.getElementById('studyInput');
+            const value = input.value.trim();
+            if(!value) return;
+            studyTopics.push(value);
+            input.value = "";
+            renderStudyTopics();
+        }
+        function renderStudyTopics() { renderChipList('studyList', studyTopics, removeStudyTopic); }
+        function removeStudyTopic(i) { studyTopics.splice(i, 1); renderStudyTopics(); }
+        function clearStudyTopics() {
+            studyTopics = [];
+            renderStudyTopics();
+            document.getElementById('studyResult').innerText = "";
+        }
+
+        function pickStudyTopic() {
+            if(!studyTopics.length) {
+                document.getElementById('studyResult').innerText = "Önce en az 1 konu gir.";
+                return;
+            }
+            document.getElementById('studyResult').innerText = `Bugünkü tekrar: ${pickRandom(studyTopics)}`;
         function pickStudyTopic() {
             const raw = document.getElementById('studyTopics').value;
             const topics = raw.split('\n').map(x => x.trim()).filter(Boolean);
@@ -691,6 +785,24 @@
             vibratePulse(config.haptic);
         }
 
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const value = input.value.trim();
+            if(!value) return;
+            namePool.push(value);
+            input.value = "";
+            renderNames();
+        }
+        function renderNames() { renderChipList('nameListVisual', namePool, removeName); }
+        function removeName(i) { namePool.splice(i, 1); renderNames(); }
+
+        function drawNames() {
+            if(!namePool.length) {
+                document.getElementById('namesResult').innerText = "Önce isimleri gir.";
+                return;
+            }
+            const count = Math.max(1, Math.min(parseInt(document.getElementById('nameCount').value || '1', 10), namePool.length));
+            const shuffled = [...namePool].sort(() => Math.random() - 0.5);
         function drawNames() {
             const raw = document.getElementById('nameList').value;
             const list = raw.split(/[\n,]/).map(x => x.trim()).filter(Boolean);
@@ -712,12 +824,25 @@
             deck = [];
             suits.forEach(s => ranks.forEach(r => deck.push(`${r}${s}`)));
             document.getElementById('cardResult').innerText = "Deste yenilendi (52 kart).";
+            document.getElementById('cardVisual').innerText = "🂠";
+            document.getElementById('cardVisual').classList.remove('red');
+            document.getElementById('cardHistory').innerHTML = "";
         }
         function drawCard() {
             if(deck.length === 0) resetDeck();
             const i = Math.floor(Math.random() * deck.length);
             const card = deck.splice(i, 1)[0];
             document.getElementById('cardResult').innerText = `Kart: ${card}  |  Kalan: ${deck.length}`;
+            const suit = card.slice(-1);
+            const visual = document.getElementById('cardVisual');
+            visual.innerText = card;
+            visual.classList.toggle('red', suit === '♥' || suit === '♦');
+            const mini = document.createElement('div');
+            mini.className = `mini-card ${(suit === '♥' || suit === '♦') ? 'red' : ''}`;
+            mini.innerText = card;
+            const history = document.getElementById('cardHistory');
+            history.prepend(mini);
+            if(history.childElementCount > 10) history.removeChild(history.lastElementChild);
             playSound('roll');
         }
 
@@ -739,6 +864,10 @@
         document.getElementById('vibrateToggle').addEventListener('change', persistSettings);
         document.getElementById('soundToggle').addEventListener('change', persistSettings);
         document.getElementById('hapticStrength').addEventListener('change', e => { config.haptic = Number(e.target.value); persistSettings(); });
+        document.getElementById('studyInput').addEventListener('keydown', e => { if(e.key === 'Enter') addStudyTopic(); });
+        document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key === 'Enter') addName(); });
+        renderStudyTopics();
+        renderNames();
         loadSettings();
     </script>
 </body>
