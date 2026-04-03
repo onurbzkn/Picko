@@ -11,6 +11,9 @@
             --secondary: #7000ff;
             --text: #ffffff;
             --die-size: 80px;
+            --nav-height: 75px;
+            --nav-safe: env(safe-area-inset-bottom, 0px);
+            --nav-total: calc(var(--nav-height) + var(--nav-safe));
         }
 
         body {
@@ -19,7 +22,8 @@
             color: var(--text);
             font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -27,17 +31,73 @@
         /* Navigasyon */
         .bottom-nav {
             position: fixed;
-            bottom: 0; width: 100%; height: 75px;
-            background: rgba(15, 20, 35, 0.95);
-            backdrop-filter: blur(10px);
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: min(100%, 720px);
+            height: var(--nav-height);
+            padding-bottom: var(--nav-safe);
+            background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+            backdrop-filter: blur(22px) saturate(170%);
+            -webkit-backdrop-filter: blur(22px) saturate(170%);
             display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-bottom: 0;
+            border-radius: 24px 24px 0 0;
             z-index: 1000;
+            box-sizing: content-box;
+            overflow: hidden;
+            box-shadow:
+                0 -10px 30px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.35),
+                inset 0 -1px 0 rgba(255,255,255,0.08);
         }
-        .nav-item { color: #444; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.3s; text-transform: uppercase; text-align: center; }
-        .nav-item.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+        .bottom-nav::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            left: -25%;
+            width: 45%;
+            height: 220%;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.38) 50%, rgba(255,255,255,0) 100%);
+            filter: blur(1px);
+            animation: liquidShine 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes liquidShine {
+            0% { transform: translateX(-40%) rotate(12deg); opacity: 0.2; }
+            45% { opacity: 0.55; }
+            100% { transform: translateX(330%) rotate(12deg); opacity: 0.2; }
+        }
+        .nav-item {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            color: #9aa0ae;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform .25s ease, color .25s ease, background-color .25s ease, box-shadow .25s ease;
+            z-index: 1;
+            user-select: none;
+        }
+        .nav-item.active {
+            color: #fff;
+            transform: translateY(-4px) scale(1.06);
+            background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+            box-shadow:
+                0 10px 24px rgba(0, 242, 255, 0.22),
+                inset 0 0 0 1px rgba(255,255,255,0.25),
+                0 0 18px var(--accent);
+            text-shadow: 0 0 12px var(--accent);
+        }
+        .nav-item:active {
+            transform: translateY(-1px) scale(0.98);
+        }
 
-        .tab-content { display: none; height: calc(100vh - 75px); width: 100%; position: relative; }
+        .tab-content { display: none; height: calc(100dvh - var(--nav-total)); width: 100%; position: relative; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
         /* Finger Geri Sayım - Tam Orta */
@@ -182,10 +242,10 @@
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="showTab('finger', this)">Finger</div>
-        <div class="nav-item" onclick="showTab('dice', this)">Dice</div>
-        <div class="nav-item" onclick="showTab('flow', this)">Flow</div>
-        <div class="nav-item" onclick="showTab('settings', this)">Settings</div>
+        <div class="nav-item active" onclick="showTab('finger', this)" aria-label="Finger">👆</div>
+        <div class="nav-item" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
+        <div class="nav-item" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
+        <div class="nav-item" onclick="showTab('settings', this)" aria-label="Settings">⚙️</div>
     </nav>
 
     <script>
