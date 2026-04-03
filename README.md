@@ -40,6 +40,8 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
             backdrop-filter: blur(22px) saturate(170%);
             -webkit-backdrop-filter: blur(22px) saturate(170%);
+            background: rgba(15, 20, 35, 0.95);
+            backdrop-filter: blur(10px);
             display: flex; justify-content: space-around; align-items: center;
             border: 1px solid rgba(255,255,255,0.16);
             border-bottom: 0;
