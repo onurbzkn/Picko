@@ -32,6 +32,9 @@
             height: 100dvh;
             padding-bottom: var(--nav-total);
             box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
             height: calc(100dvh - var(--nav-total));
             overflow: hidden;
         }
@@ -55,6 +58,7 @@
             z-index: 1000;
             box-sizing: content-box;
             overflow: hidden;
+            pointer-events: auto;
             box-shadow:
                 0 -10px 30px rgba(0, 0, 0, 0.25),
                 inset 0 1px 0 rgba(255,255,255,0.35),
@@ -90,6 +94,7 @@
             transition: transform .25s ease, color .25s ease, background-color .25s ease, box-shadow .25s ease;
             z-index: 1;
             user-select: none;
+            pointer-events: auto;
         }
         .nav-item.active {
             color: #fff;
@@ -471,6 +476,10 @@
     </div>
 
     <nav class="bottom-nav">
+        <div class="nav-item active" data-tab="finger" onclick="showTab('finger', this)" aria-label="Finger">👆</div>
+        <div class="nav-item" data-tab="dice" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
+        <div class="nav-item" data-tab="flow" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
+        <div class="nav-item" data-tab="settings" onclick="showTab('settings', this)" aria-label="Settings">⚙️</div>
         <div class="nav-item active" onclick="showTab('finger', this)" aria-label="Finger">👆</div>
         <div class="nav-item" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
         <div class="nav-item" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
@@ -861,6 +870,9 @@
         resetDeck();
         setAnimSpeed(1);
         setWinnerCount(1, document.querySelector('.pick-btn'));
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => showTab(item.dataset.tab, item));
+        });
         document.getElementById('vibrateToggle').addEventListener('change', persistSettings);
         document.getElementById('soundToggle').addEventListener('change', persistSettings);
         document.getElementById('hapticStrength').addEventListener('change', e => { config.haptic = Number(e.target.value); persistSettings(); });
