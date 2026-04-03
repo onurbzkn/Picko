@@ -184,6 +184,42 @@
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Flow+ Extra Tools */
+        .tool-shell { width: 92%; max-width: 700px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .tool-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
+        .tool-tab {
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.06);
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tool-tab.active { color: #fff; border-color: var(--accent); box-shadow: 0 0 12px rgba(0,242,255,.28); }
+        .tool-panel { display: none; width: 100%; background: rgba(255,255,255,0.05); border-radius: 18px; padding: 14px; box-sizing: border-box; }
+        .tool-panel.active { display: block; }
+        .tool-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .tool-input, .tool-select, .tool-btn, .tool-textarea {
+            border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+            background: rgba(0,0,0,.18); color: #fff;
+        }
+        .tool-input, .tool-select { padding: 9px 10px; }
+        .tool-textarea { width: 100%; min-height: 78px; padding: 10px; resize: vertical; box-sizing: border-box; }
+        .tool-btn { padding: 10px 12px; font-weight: 700; cursor: pointer; }
+        .tool-result { margin-top: 10px; font-weight: 700; font-size: 1.05rem; color: var(--accent); min-height: 24px; }
+        .coin {
+            width: 100px; height: 100px; margin: 6px auto; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff7bf, #eab308 50%, #a16207 100%);
+            display: grid; place-items: center; font-size: 2rem; font-weight: 900; color: #332400;
+            transform-style: preserve-3d;
+        }
+        .coin.flip { animation: coinFlip 1s ease-in-out; }
+        @keyframes coinFlip {
+            0% { transform: rotateY(0) rotateX(0); }
+            100% { transform: rotateY(1080deg) rotateX(720deg); }
+        }
     </style>
 </head>
 <body>
@@ -206,12 +242,74 @@
             <div class="hint" data-tr="ATMAK İÇİN DOKUN" data-en="TOUCH TO ROLL">ATMAK İÇİN DOKUN</div>
         </div>
 
-        <div id="flow" class="tab-content" onclick="spinArrow()">
-            <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-                <div id="arrow"></div>
-                <div style="position:absolute; width:30px; height:30px; background:#fff; border-radius:50%; box-shadow:0 0 20px #fff;"></div>
+        <div id="flow" class="tab-content">
+            <div class="tool-shell">
+                <div class="tool-tabs">
+                    <button class="tool-tab active" onclick="showTool('arrow', this)">Çark</button>
+                    <button class="tool-tab" onclick="showTool('couples', this)">Çiftler</button>
+                    <button class="tool-tab" onclick="showTool('study', this)">Eğitim</button>
+                    <button class="tool-tab" onclick="showTool('coin', this)">Yazı-Tura</button>
+                    <button class="tool-tab" onclick="showTool('names', this)">İsim Çek</button>
+                    <button class="tool-tab" onclick="showTool('cards', this)">Kart Çek</button>
+                </div>
+
+                <div id="tool-arrow" class="tool-panel active">
+                    <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+                        <div id="arrow"></div>
+                        <div style="position:absolute; width:30px; height:30px; background:#fff; border-radius:50%; box-shadow:0 0 20px #fff;"></div>
+                    </div>
+                    <div class="tool-row" style="justify-content:center;">
+                        <button class="tool-btn" onclick="spinArrow()">Döndür</button>
+                    </div>
+                    <div class="tool-result" id="arrowResult"></div>
+                </div>
+
+                <div id="tool-couples" class="tool-panel">
+                    <div class="tool-row">
+                        <select id="coupleTopic" class="tool-select">
+                            <option value="dinner">Akşam ne yiyelim?</option>
+                            <option value="movie">Hangi tür film?</option>
+                            <option value="weekend">Hafta sonu ne yapalım?</option>
+                        </select>
+                        <button class="tool-btn" onclick="pickCouples()">Rastgele Seç</button>
+                    </div>
+                    <div class="tool-result" id="couplesResult"></div>
+                </div>
+
+                <div id="tool-study" class="tool-panel">
+                    <textarea id="studyTopics" class="tool-textarea" placeholder="Konuları satır satır yaz (örn: Sinir Sistemi Hastalıkları)"></textarea>
+                    <div class="tool-row">
+                        <button class="tool-btn" onclick="pickStudyTopic()">Konu Seç</button>
+                    </div>
+                    <div class="tool-result" id="studyResult"></div>
+                </div>
+
+                <div id="tool-coin" class="tool-panel">
+                    <div id="coinVisual" class="coin">?</div>
+                    <div class="tool-row" style="justify-content:center;">
+                        <button class="tool-btn" onclick="flipCoin()">Parayı At</button>
+                    </div>
+                    <div class="tool-result" id="coinResult"></div>
+                </div>
+
+                <div id="tool-names" class="tool-panel">
+                    <textarea id="nameList" class="tool-textarea" placeholder="İsimleri virgül veya satırla ayırarak gir"></textarea>
+                    <div class="tool-row">
+                        <input id="nameCount" class="tool-input" type="number" min="1" value="1" style="width:90px;">
+                        <button class="tool-btn" onclick="drawNames()">İsim Çek</button>
+                    </div>
+                    <div class="tool-result" id="namesResult"></div>
+                </div>
+
+                <div id="tool-cards" class="tool-panel">
+                    <div class="tool-row">
+                        <button class="tool-btn" onclick="drawCard()">Kart Çek</button>
+                        <button class="tool-btn" onclick="resetDeck()">Desteyi Sıfırla</button>
+                    </div>
+                    <div class="tool-result" id="cardResult"></div>
+                </div>
             </div>
-            <div class="hint" data-tr="DÖNDÜRMEK İÇİN DOKUN" data-en="TOUCH TO SPIN">DÖNDÜRMEK İÇİN DOKUN</div>
+            <div class="hint" data-tr="MOD SEÇ, KARAR VER" data-en="CHOOSE MODE, DECIDE FAST">MOD SEÇ, KARAR VER</div>
         </div>
 
         <div id="settings" class="tab-content">
@@ -391,17 +489,94 @@
             });
         }
 
-        /* Flow Logic */
+        /* Flow + Extra Tools Logic */
+        function showTool(id, el) {
+            document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tool-' + id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        const couplesOptions = {
+            dinner: ["Pizza + film gecesi", "Sushi", "Makarna + salata", "Burger", "Evde kahvaltı tabağı"],
+            movie: ["Romantik Komedi", "Gerilim", "Animasyon", "Bilim Kurgu", "Belgesel"],
+            weekend: ["Sahilde yürüyüş", "Kahve + kitap", "Müze gezisi", "Oyun gecesi", "Mini piknik"]
+        };
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function pickCouples() {
+            const key = document.getElementById('coupleTopic').value;
+            const choice = pickRandom(couplesOptions[key]);
+            document.getElementById('couplesResult').innerText = `Öneri: ${choice}`;
+            playSound('win');
+        }
+
+        function pickStudyTopic() {
+            const raw = document.getElementById('studyTopics').value;
+            const topics = raw.split('\n').map(x => x.trim()).filter(Boolean);
+            if(!topics.length) {
+                document.getElementById('studyResult').innerText = "Önce en az 1 konu gir.";
+                return;
+            }
+            document.getElementById('studyResult').innerText = `Bugünkü tekrar: ${pickRandom(topics)}`;
+            playSound('roll');
+        }
+
+        function flipCoin() {
+            const result = Math.random() < 0.5 ? "Yazı" : "Tura";
+            const coin = document.getElementById('coinVisual');
+            coin.classList.remove('flip');
+            void coin.offsetWidth;
+            coin.classList.add('flip');
+            setTimeout(() => { coin.innerText = result === "Yazı" ? "Y" : "T"; }, 450);
+            document.getElementById('coinResult').innerText = `Sonuç: ${result}`;
+            playSound('roll');
+            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(30);
+        }
+
+        function drawNames() {
+            const raw = document.getElementById('nameList').value;
+            const list = raw.split(/[\n,]/).map(x => x.trim()).filter(Boolean);
+            if(!list.length) {
+                document.getElementById('namesResult').innerText = "Önce isimleri gir.";
+                return;
+            }
+            const count = Math.max(1, Math.min(parseInt(document.getElementById('nameCount').value || '1', 10), list.length));
+            const shuffled = [...list].sort(() => Math.random() - 0.5);
+            const picked = shuffled.slice(0, count);
+            document.getElementById('namesResult').innerText = count === 1 ? `Seçilen: ${picked[0]}` : `Seçilenler: ${picked.join(', ')}`;
+            playSound('win');
+        }
+
+        const suits = ["♠", "♥", "♦", "♣"];
+        const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+        let deck = [];
+        function resetDeck() {
+            deck = [];
+            suits.forEach(s => ranks.forEach(r => deck.push(`${r}${s}`)));
+            document.getElementById('cardResult').innerText = "Deste yenilendi (52 kart).";
+        }
+        function drawCard() {
+            if(deck.length === 0) resetDeck();
+            const i = Math.floor(Math.random() * deck.length);
+            const card = deck.splice(i, 1)[0];
+            document.getElementById('cardResult').innerText = `Kart: ${card}  |  Kalan: ${deck.length}`;
+            playSound('roll');
+        }
+
         let currentRotation = 0;
         function spinArrow() {
             const arrow = document.getElementById('arrow');
             currentRotation += 2000 + Math.floor(Math.random() * 2000);
             arrow.style.transform = `rotate(${currentRotation}deg)`;
+            const deg = ((currentRotation % 360) + 360) % 360;
+            document.getElementById('arrowResult').innerText = `Açı: ${Math.round(deg)}°`;
             playSound('roll');
             if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(20);
         }
 
         setDice(1);
+        resetDeck();
     </script>
 </body>
 </html>
