@@ -23,6 +23,7 @@
             font-family: 'Segoe UI', sans-serif;
             overflow-x: hidden;
             overflow-y: auto;
+            overflow: hidden;
             min-height: 100vh;
             min-height: 100dvh;
             user-select: none;
@@ -45,6 +46,8 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
             backdrop-filter: blur(22px) saturate(170%);
             -webkit-backdrop-filter: blur(22px) saturate(170%);
+            background: rgba(15, 20, 35, 0.95);
+            backdrop-filter: blur(10px);
             display: flex; justify-content: space-around; align-items: center;
             border: 1px solid rgba(255,255,255,0.16);
             border-bottom: 0;
@@ -105,6 +108,8 @@
         .tab-content { display: none; height: 100%; width: 100%; position: relative; overflow-y: auto; box-sizing: border-box; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 14px 28px; }
         #dice.tab-content.active, #flow.tab-content.active, #settings.tab-content.active { justify-content: flex-start; }
+        .tab-content { display: none; height: calc(100dvh - var(--nav-total)); width: 100%; position: relative; }
+        .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
         /* Finger Geri Sayım - Tam Orta */
         #countdown { 
@@ -687,6 +692,7 @@
             document.getElementById('coinResult').innerText = `Sonuç: ${result}`;
             playSound('roll');
             vibratePulse(config.haptic);
+            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(30);
         }
 
         function drawNames() {
