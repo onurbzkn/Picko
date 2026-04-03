@@ -21,11 +21,17 @@
             background: var(--bg-color);
             color: var(--text);
             font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
             overflow: hidden;
             min-height: 100vh;
             min-height: 100dvh;
             user-select: none;
             -webkit-user-select: none;
+        }
+        .content {
+            height: calc(100dvh - var(--nav-total));
+            overflow: hidden;
         }
 
         /* Navigasyon */
@@ -99,6 +105,9 @@
             transform: translateY(-1px) scale(0.98);
         }
 
+        .tab-content { display: none; height: 100%; width: 100%; position: relative; overflow-y: auto; box-sizing: border-box; }
+        .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 14px 28px; }
+        #dice.tab-content.active, #flow.tab-content.active, #settings.tab-content.active { justify-content: flex-start; }
         .tab-content { display: none; height: calc(100dvh - var(--nav-total)); width: 100%; position: relative; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
@@ -118,7 +127,25 @@
             pointer-events: none;
         }
 
-        #finger-area { width: 100%; height: 100%; touch-action: none; position: relative; }
+        #finger-area { width: 100%; flex: 1; touch-action: none; position: relative; min-height: 300px; }
+        .finger-picker {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+        }
+        .pick-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.24);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-weight: 800;
+        }
+        .pick-btn.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(0,242,255,.4); color: var(--accent); }
         .touch-circle {
             position: absolute; width: 90px; height: 90px;
             border: 5px solid var(--accent); border-radius: 50%;
@@ -170,11 +197,26 @@
         }
 
         /* Ayarlar */
-        .settings-list { width: 85%; max-width: 400px; }
-        .setting-item {
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
-            margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
+        .settings-list { width: 92%; max-width: 420px; display: grid; gap: 16px; }
+        .settings-group {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 16px;
+            overflow: hidden;
         }
+        .settings-group-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: .65;
+            padding: 0 6px 2px;
+        }
+        .setting-item {
+            background: rgba(255,255,255,0.02); padding: 14px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .setting-item:last-child { border-bottom: 0; }
         .color-dots { display: flex; gap: 10px; }
         .dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .dot.active { border-color: white; transform: scale(1.1); }
@@ -226,10 +268,16 @@
 
     <div id="countdown"></div>
 
-    <div class="content">
+        <div class="content">
         <div id="finger" class="tab-content active">
+            <div class="finger-picker">
+                <button class="pick-btn active" onclick="setWinnerCount(1, this)">1</button>
+                <button class="pick-btn" onclick="setWinnerCount(2, this)">2</button>
+                <button class="pick-btn" onclick="setWinnerCount(3, this)">3</button>
+                <button class="tool-btn" style="padding:8px 10px;" onclick="resetFinger()">Sıfırla</button>
+            </div>
             <div id="finger-area"></div>
-            <div class="hint" data-tr="EN AZ 2 PARMAKLA DOKUN" data-en="TOUCH WITH AT LEAST 2 FINGERS">EN AZ 2 PARMAKLA DOKUN</div>
+            <div class="hint" id="fingerHint" data-tr="SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE" data-en="ADD TOUCHES / CLICKS UP TO SELECTED COUNT">SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE</div>
         </div>
 
         <div id="dice" class="tab-content" onclick="rollDice()">
@@ -315,26 +363,61 @@
         <div id="settings" class="tab-content">
             <h2 style="margin-bottom:30px;" data-tr="AYARLAR" data-en="SETTINGS">AYARLAR</h2>
             <div class="settings-list">
-                <div class="setting-item">
-                    <span data-tr="Tema Rengi" data-en="Theme Color">Tema Rengi</span>
-                    <div class="color-dots">
-                        <div class="dot" style="background:#00f2ff;" onclick="setTheme('#00f2ff')"></div>
-                        <div class="dot" style="background:#00ff88;" onclick="setTheme('#00ff88')"></div>
-                        <div class="dot" style="background:#ff00ea;" onclick="setTheme('#ff00ea')"></div>
-                        <div class="dot" style="background:#ff9500;" onclick="setTheme('#ff9500')"></div>
+                <div>
+                    <div class="settings-group-title">Görünüm</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Tema Rengi" data-en="Theme Color">Tema Rengi</span>
+                            <div class="color-dots">
+                                <div class="dot" style="background:#00f2ff;" onclick="setTheme('#00f2ff')"></div>
+                                <div class="dot" style="background:#00ff88;" onclick="setTheme('#00ff88')"></div>
+                                <div class="dot" style="background:#ff00ea;" onclick="setTheme('#ff00ea')"></div>
+                                <div class="dot" style="background:#ff9500;" onclick="setTheme('#ff9500')"></div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <span>Animasyon Hızı</span>
+                            <select id="animSpeed" class="tool-select" onchange="setAnimSpeed(this.value)">
+                                <option value="1">Normal</option>
+                                <option value="0.75">Hızlı</option>
+                                <option value="1.25">Yavaş</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="setting-item">
-                    <span data-tr="Titreşim" data-en="Vibration">Titreşim</span>
-                    <label class="switch"><input type="checkbox" id="vibrateToggle" checked><span class="slider"></span></label>
+                <div>
+                    <div class="settings-group-title">Geri Bildirim</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Titreşim" data-en="Vibration">Titreşim</span>
+                            <label class="switch"><input type="checkbox" id="vibrateToggle" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-tr="Ses Efektleri" data-en="Sound Effects">Ses Efektleri</span>
+                            <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-tr="Haptik Gücü" data-en="Haptic Strength">Haptik Gücü</span>
+                            <select id="hapticStrength" class="tool-select">
+                                <option value="20">Hafif</option>
+                                <option value="40" selected>Orta</option>
+                                <option value="80">Güçlü</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="setting-item">
-                    <span data-tr="Ses Efektleri" data-en="Sound Effects">Ses Efektleri</span>
-                    <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
-                </div>
-                <div class="setting-item">
-                    <span data-tr="Dil / Language" data-en="Language / Dil">Dil</span>
-                    <button onclick="toggleLang()" id="langBtn" style="background:none; border:1px solid #555; color:white; padding:5px 10px; border-radius:8px;">TR</button>
+                <div>
+                    <div class="settings-group-title">Genel</div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <span data-tr="Dil / Language" data-en="Language / Dil">Dil</span>
+                            <button onclick="toggleLang()" id="langBtn" style="background:none; border:1px solid #555; color:white; padding:5px 10px; border-radius:8px;">TR</button>
+                        </div>
+                        <div class="setting-item">
+                            <span>Verileri Sıfırla</span>
+                            <button class="tool-btn" onclick="resetAppSettings()">Sıfırla</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style="margin-top:20px; font-size:12px; opacity:0.3;">Picko v4.1 - Hocama Özel</div>
@@ -350,7 +433,8 @@
 
     <script>
         let currentLang = 'tr';
-        const config = { accent: '#00f2ff', vibrate: true, sound: true };
+        const config = { accent: '#00f2ff', vibrate: true, sound: true, winners: 1, haptic: 40, animSpeed: 1 };
+        const STORAGE_KEY = 'pickoSettingsV2';
 
         function showTab(id, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -363,6 +447,7 @@
         function setTheme(color) {
             document.documentElement.style.setProperty('--accent', color);
             config.accent = color;
+            persistSettings();
         }
 
         function toggleLang() {
@@ -371,6 +456,55 @@
             document.querySelectorAll('[data-tr]').forEach(el => {
                 el.innerText = el.getAttribute('data-' + currentLang);
             });
+            persistSettings();
+        }
+
+        function setAnimSpeed(multiplier) {
+            config.animSpeed = Number(multiplier) || 1;
+            document.getElementById('arrow').style.transitionDuration = `${4 * config.animSpeed}s`;
+            persistSettings();
+        }
+
+        function vibratePulse(ms = config.haptic) {
+            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(ms);
+        }
+
+        function persistSettings() {
+            const payload = {
+                accent: config.accent,
+                lang: currentLang,
+                winners: config.winners,
+                haptic: Number(document.getElementById('hapticStrength')?.value || 40),
+                animSpeed: Number(document.getElementById('animSpeed')?.value || 1),
+                sound: document.getElementById('soundToggle')?.checked,
+                vibrate: document.getElementById('vibrateToggle')?.checked
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }
+
+        function loadSettings() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(!raw) return;
+            const s = JSON.parse(raw);
+            if(s.accent) setTheme(s.accent);
+            if(typeof s.sound === 'boolean') document.getElementById('soundToggle').checked = s.sound;
+            if(typeof s.vibrate === 'boolean') document.getElementById('vibrateToggle').checked = s.vibrate;
+            if(s.haptic) document.getElementById('hapticStrength').value = String(s.haptic);
+            if(s.animSpeed) {
+                document.getElementById('animSpeed').value = String(s.animSpeed);
+                setAnimSpeed(s.animSpeed);
+            }
+            if(s.winners) {
+                const idx = Math.min(3, Math.max(1, Number(s.winners)));
+                const btn = document.querySelectorAll('.pick-btn')[idx - 1];
+                setWinnerCount(idx, btn);
+            }
+            if(s.lang && s.lang !== currentLang) toggleLang();
+        }
+
+        function resetAppSettings() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
         }
 
         function playSound(type) {
@@ -395,6 +529,17 @@
         const fingerArea = document.getElementById('finger-area');
         const countdownEl = document.getElementById('countdown');
         let touches = {}, timer = null, isFinished = false;
+        let mouseCounter = 0;
+
+        function setWinnerCount(n, el) {
+            config.winners = n;
+            document.querySelectorAll('.pick-btn').forEach(b => b.classList.remove('active'));
+            if(el) el.classList.add('active');
+            const hint = document.getElementById('fingerHint');
+            hint.innerText = `${n} kişi seçilecek - ${n} temas/tıklama ekle`;
+            persistSettings();
+            checkTimer();
+        }
 
         fingerArea.addEventListener('touchstart', e => {
             if(isFinished) resetFinger();
@@ -425,9 +570,23 @@
             checkTimer();
         });
 
+        fingerArea.addEventListener('mousedown', e => {
+            if(e.button !== 0) return;
+            if(isFinished) resetFinger();
+            const id = `m-${mouseCounter++}`;
+            const dot = document.createElement('div');
+            dot.className = 'touch-circle';
+            dot.id = id;
+            dot.style.left = e.offsetX + 'px';
+            dot.style.top = e.offsetY + 'px';
+            fingerArea.appendChild(dot);
+            touches[id] = dot;
+            checkTimer();
+        });
+
         function checkTimer() {
             const count = Object.keys(touches).length;
-            if (count > 1) { if (!timer) startCountdown(); } else { stopCountdown(); }
+            if (count >= config.winners) { if (!timer) startCountdown(); } else { stopCountdown(); }
         }
 
         function startCountdown() {
@@ -442,12 +601,13 @@
 
         function selectWinner() {
             const keys = Object.keys(touches);
-            if(keys.length < 2) return;
-            const winnerKey = keys[Math.floor(Math.random() * keys.length)];
-            keys.forEach(k => touches[k].classList.add(k === winnerKey ? 'winner' : 'loser'));
-            isFinished = true; countdownEl.innerText = "!";
+            if(keys.length < config.winners) return;
+            const shuffled = [...keys].sort(() => Math.random() - 0.5);
+            const winners = new Set(shuffled.slice(0, config.winners));
+            keys.forEach(k => touches[k].classList.add(winners.has(k) ? 'winner' : 'loser'));
+            isFinished = true; countdownEl.innerText = `${config.winners}`;
             playSound('win');
-            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
+            vibratePulse([80, 40, 80]);
         }
 
         function resetFinger() { fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
@@ -471,7 +631,7 @@
         function rollDice() {
             const cubes = document.querySelectorAll('.cube');
             playSound('roll');
-            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(50);
+            vibratePulse(config.haptic);
             cubes.forEach(cube => {
                 const result = Math.floor(Math.random() * 6) + 1;
                 const xExtra = (Math.floor(Math.random() * 4) + 4) * 360;
@@ -531,6 +691,7 @@
             setTimeout(() => { coin.innerText = result === "Yazı" ? "Y" : "T"; }, 450);
             document.getElementById('coinResult').innerText = `Sonuç: ${result}`;
             playSound('roll');
+            vibratePulse(config.haptic);
             if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(30);
         }
 
@@ -572,11 +733,17 @@
             const deg = ((currentRotation % 360) + 360) % 360;
             document.getElementById('arrowResult').innerText = `Açı: ${Math.round(deg)}°`;
             playSound('roll');
-            if(document.getElementById('vibrateToggle').checked && window.navigator.vibrate) window.navigator.vibrate(20);
+            vibratePulse(config.haptic);
         }
 
         setDice(1);
         resetDeck();
+        setAnimSpeed(1);
+        setWinnerCount(1, document.querySelector('.pick-btn'));
+        document.getElementById('vibrateToggle').addEventListener('change', persistSettings);
+        document.getElementById('soundToggle').addEventListener('change', persistSettings);
+        document.getElementById('hapticStrength').addEventListener('change', e => { config.haptic = Number(e.target.value); persistSettings(); });
+        loadSettings();
     </script>
 </body>
 </html>
