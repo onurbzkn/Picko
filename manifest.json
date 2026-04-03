@@ -1,7 +1,7 @@
 {
-  "name": "Picko",
-  "short_name": "Picko",
-  "description": "The ultimate neon chaos decider for friends.",
+  "name": "Picko Live",
+  "short_name": "Picko Live",
+  "description": "Picko Live: The ultimate neon chaos decider for friends.",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#000000",
