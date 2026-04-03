@@ -35,6 +35,8 @@
             overflow: hidden;
             position: relative;
             z-index: 1;
+            height: calc(100dvh - var(--nav-total));
+            overflow: hidden;
         }
 
         /* Navigasyon */
@@ -306,6 +308,7 @@
                 <button class="pick-btn active" onclick="setWinnerCount(1, this)">1</button>
                 <button class="pick-btn" onclick="setWinnerCount(2, this)">2</button>
                 <button class="pick-btn" onclick="setWinnerCount(3, this)">3</button>
+                <button class="tool-btn" style="padding:8px 10px;" onclick="resetFinger()">Sıfırla</button>
             </div>
             <div id="finger-area"></div>
             <div class="hint" id="fingerHint" data-tr="SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE" data-en="ADD TOUCHES / CLICKS UP TO SELECTED COUNT">SEÇİLEN SAYI KADAR PARMAK / TIKLAMA EKLE</div>
@@ -363,6 +366,8 @@
                     <div id="studyList" class="chip-list"></div>
                     <div class="tool-row">
                         <button class="tool-btn" onclick="clearStudyTopics()">Temizle</button>
+                    <textarea id="studyTopics" class="tool-textarea" placeholder="Konuları satır satır yaz (örn: Sinir Sistemi Hastalıkları)"></textarea>
+                    <div class="tool-row">
                         <button class="tool-btn" onclick="pickStudyTopic()">Konu Seç</button>
                     </div>
                     <div class="tool-result" id="studyResult"></div>
@@ -384,6 +389,11 @@
                         <button class="tool-btn" onclick="drawNames()">İsim Çek</button>
                     </div>
                     <div id="nameListVisual" class="chip-list"></div>
+                    <textarea id="nameList" class="tool-textarea" placeholder="İsimleri virgül veya satırla ayırarak gir"></textarea>
+                    <div class="tool-row">
+                        <input id="nameCount" class="tool-input" type="number" min="1" value="1" style="width:90px;">
+                        <button class="tool-btn" onclick="drawNames()">İsim Çek</button>
+                    </div>
                     <div class="tool-result" id="namesResult"></div>
                 </div>
 
@@ -395,6 +405,7 @@
                     <div id="cardVisual" class="playing-card">🂠</div>
                     <div class="tool-result" id="cardResult"></div>
                     <div id="cardHistory" class="card-history"></div>
+                    <div class="tool-result" id="cardResult"></div>
                 </div>
             </div>
             <div class="hint" data-tr="MOD SEÇ, KARAR VER" data-en="CHOOSE MODE, DECIDE FAST">MOD SEÇ, KARAR VER</div>
@@ -469,6 +480,10 @@
         <div class="nav-item" data-tab="dice" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
         <div class="nav-item" data-tab="flow" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
         <div class="nav-item" data-tab="settings" onclick="showTab('settings', this)" aria-label="Settings">⚙️</div>
+        <div class="nav-item active" onclick="showTab('finger', this)" aria-label="Finger">👆</div>
+        <div class="nav-item" onclick="showTab('dice', this)" aria-label="Dice">🎲</div>
+        <div class="nav-item" onclick="showTab('flow', this)" aria-label="Flow">🧭</div>
+        <div class="nav-item" onclick="showTab('settings', this)" aria-label="Settings">⚙️</div>
     </nav>
 
     <script>
@@ -654,6 +669,9 @@
         }
 
         function resetFinger() { clearTimeout(autoResetTimer); fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
+        }
+
+        function resetFinger() { fingerArea.innerHTML = ""; touches = {}; isFinished = false; stopCountdown(); }
 
         /* 3D Dice Logic */
         function setDice(n) {
@@ -753,6 +771,14 @@
                 return;
             }
             document.getElementById('studyResult').innerText = `Bugünkü tekrar: ${pickRandom(studyTopics)}`;
+        function pickStudyTopic() {
+            const raw = document.getElementById('studyTopics').value;
+            const topics = raw.split('\n').map(x => x.trim()).filter(Boolean);
+            if(!topics.length) {
+                document.getElementById('studyResult').innerText = "Önce en az 1 konu gir.";
+                return;
+            }
+            document.getElementById('studyResult').innerText = `Bugünkü tekrar: ${pickRandom(topics)}`;
             playSound('roll');
         }
 
@@ -786,6 +812,15 @@
             }
             const count = Math.max(1, Math.min(parseInt(document.getElementById('nameCount').value || '1', 10), namePool.length));
             const shuffled = [...namePool].sort(() => Math.random() - 0.5);
+        function drawNames() {
+            const raw = document.getElementById('nameList').value;
+            const list = raw.split(/[\n,]/).map(x => x.trim()).filter(Boolean);
+            if(!list.length) {
+                document.getElementById('namesResult').innerText = "Önce isimleri gir.";
+                return;
+            }
+            const count = Math.max(1, Math.min(parseInt(document.getElementById('nameCount').value || '1', 10), list.length));
+            const shuffled = [...list].sort(() => Math.random() - 0.5);
             const picked = shuffled.slice(0, count);
             document.getElementById('namesResult').innerText = count === 1 ? `Seçilen: ${picked[0]}` : `Seçilenler: ${picked.join(', ')}`;
             playSound('win');
